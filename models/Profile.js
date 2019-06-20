@@ -7,7 +7,7 @@ var ProfileSchema = mongoose.Schema({
         ref: 'user'
     },
     bio: String,
-    last_online: [Date],
+    last_online: Date,
     groups: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'group'
