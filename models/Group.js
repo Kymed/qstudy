@@ -5,27 +5,28 @@ const GroupSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    host: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+    course: {
+        type: String,
         required: true
     },
     members: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-        privilege: Number
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user',
+        },
+        host: Boolean
     }],
     stickied_posts: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
         },
+        name: String,
         post: String,
         time_stamp: Date
     }],
     max_members: Number,
     description: String,
-    course: String,
     date_created: {
         type: Date,
         default: Date.now
