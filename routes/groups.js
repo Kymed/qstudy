@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator/check');
-const auth = require('../../middleware/auth');
+const auth = require('../middleware/auth');
 
-const Group = require('../../models/Group');
-const Profile = require('../../models/Profile');
-const User = require('../../models/User');
+const Group = require('../models/Group');
+const Profile = require('../models/Profile');
+const User = require('../models/User');
 
 /*
     TO(Maybe)DO: Create some middleware to make sure the requesting user is a group member,
@@ -19,9 +19,7 @@ router.post('/', [auth, [
     check('name', 'Name is required').not().isEmpty(),
     check('course', 'A course is required').not().isEmpty()
 ]], async (req, res) => {
-    /* ********TODO******** */
-    // Test this route
-    /* ********TODO******** */
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -75,26 +73,113 @@ router.post('/', [auth, [
 // @access Private
 router.get('/', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
-        const groups = await Post.find().sort({ date: -1 });
+        const groups = await Group.find().sort({ date: -1 });
         res.json(groups);
 
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
-})
+});
+
+// This is a work in concept.........
+/*(// @route  GET api/groups/groupsByCourse
+// @desc   Get all the groups in the courses that the user is in
+// @access Private
+router.get('/groupsbycourse', auth, async (req, res) => {
+    try {
+        // Check if profile exists
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'Profile has not been created yet'});
+        }
+
+        // Create array of groups
+        let groups = new Array();
+        let groupQuery;
+
+        // Iterate through each course, querying group collection for all groups of that course
+        await profile.courses.forEach(async course => {
+            try {
+
+                // Query the group by course
+                groupQuery = await Group.find({ course: course });
+
+                // Add the query to the array
+                if (groupQuery) {
+                    groupQuery.forEach(groupQ => {
+                        groups.push(groupQ);
+                    });
+                }
+
+            } catch (err) {
+                console.error(err.message);
+                res.status(500).send('Error retreiving user\'s courses');
+            }
+        });
+
+        res.json(groups);
+
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Group not found'});
+        }
+        res.status(500).send('Server error');
+    }
+});*/
+
+// So for now
+// @route  GET api/groups/byCourse/:id
+// @desc   Get all groups of a certain course
+// @access Private
+router.get('/byCourse/:course', auth, async (req, res) => {
+
+    try {
+
+        let groups = await Group.find({course: req.params.course});
+
+        if (!groups) {
+            res.status(404).json({ msg: `unfortunately there are no study groups for ${req.params.course} as of now`});
+        }
+
+        res.json(groups);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+
+});
+
+// For some reason postman isn't getting a response
+/*// @route  GET api/groups/groupMembers/:id
+// @desc   Get all group members
+// @access Private
+router.get('/group-members/:id', auth, async (req, res) => {
+    try {
+        const group = await Group.findById(req.params.id);
+
+        if (!group) {
+            return res.status(404).json({ msg: 'Group not found'});
+        }
+
+        res.json(group.members);
+
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Group not found'});
+        }
+        res.status(500).send('Server error');
+    }
+});*/
 
 // @route  GET api/groups/:id
 // @desc   Get group by id
 // @access Private
-router.get(':/id', auth, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
         const group = await Group.findById(req.params.id);
 
         if (!group) {
@@ -112,57 +197,9 @@ router.get(':/id', auth, async (req, res) => {
     }
 });
 
-// @route  GET api/groups/groupsByCourse
-// @desc   Get all the groups in the courses that the user is in
-// @access Private
-// @note   O(N^2) algorithm should be optimized if app becomes used
-router.get('/groupsByCourse', auth, async (req, res) => {
-    try {
-
-        const groups = [];
-        let groupQuery;
-
-        const profile = await Profile.findOne({ user: req.user.id });
-
-        profile.courses.forEach(course => {
-
-            groupQuery = await Group.find({ course: course });
-            groupQuery.forEach(groupQ => {
-                groups.push(groupQ);
-            });
-
-        });
-
-        res.json(groups);
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-});
-
-// @route  GET api/groups/groupMembers/:id
-// @desc   Get all group members
-// @access Private
-router.get('/groupMembers/:id', auth, async (req, res) => {
-    try {
-
-        const group = Group.findById(req.params.id);
-
-        if (!group) {
-            return res.status(404).json({ msg: 'Group not found'});
-        }
-
-        res.json(group.members);
-
-    } catch (err) {
-        console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ msg: 'Group not found'});
-        }
-        res.status(500).send('Server error');
-    }
-});
+// @route  GET api/groups/events
+// @desc   Get the events under this group
+// @access Public
 
 // @route  DELETE api/groups/:id
 // @desc   Delete a group
@@ -179,18 +216,15 @@ router.delete('/:id', auth, async (req, res) => {
         if (!group) {
             return res.status(404).json({ msg: 'Group not found'})
         }
-ß
-        /* ********TODO******** */
-        // Test to make sure only hosts can delete groups
-        /* ********TODO******** */
-        // Make sure the user is a host
-        let user = group.members.filter(member => member.user.toString() === req.user.id);
-        if (!user) {
+
+        /* Make sure the user that sent the request is a host */
+        let requestingUser = group.members.filter(member => member.user.toString() === req.user.id);
+        if (!requestingUser[0]) {
             return res.status(400).json({ msg: 'User is not a member of this group'});
         }
-        if (user.host === false) {
+        if (requestingUser[0].host === false) {
             return res.status(401).json({ msg: 'You are not a host'});
-        }
+        }  
 
         await group.remove();
 
@@ -224,9 +258,6 @@ router.post('/posts/:group', [auth,
     const { userid, post } = req.body;
 
     try {
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
         const user = await User.findById(userid).select('-password');
         const group = await Group.findById(req.params.group);
 
@@ -236,10 +267,10 @@ router.post('/posts/:group', [auth,
 
         /* Make sure the user that sent the request is a host */
         let requestingUser = group.members.filter(member => member.user.toString() === req.user.id);
-        if (!requestingUser) {
+        if (!requestingUser[0]) {
             return res.status(400).json({ msg: 'User is not a member of this group'});
         }
-        if (requestingUser.host === false) {
+        if (requestingUser[0].host === false) {
             return res.status(401).json({ msg: 'You are not a host'});
         }
 
@@ -262,35 +293,32 @@ router.post('/posts/:group', [auth,
 
 });
 
-// @route  DELETE api/groups/posts/:group/:post_id
+// @route  DELETE api/groups/posts/:group_id/:post_id
 // @desc   Delete a stickied post
 // @access Private
-router.delete('/posts/:group/:post_id', auth, async (req, res) => {
+router.delete('/posts/:group_id/:post_id', auth, async (req, res) => {
     try {
-        const group = await Group.findById(req.params.id);
+        const group = await Group.findById(req.params.group_id);
 
         if (!group) {
             return res.status(404).json({ msg: 'Group not found'});
         }
-
         // Pull out post
-        const post = group.sticked_posts.find(post => post.id === req.params.post_id);
-
+        const removeIndex = group.stickied_posts.map(post => post.id).indexOf(req.params.post_id);
+        
         // Make sure post exists
-        if (!post) {
+        if (removeIndex < 0) {
             return res.status(404).json({ msg: 'Post does not exist'});
         }
 
         /* Make sure the user that sent the request is a host */
         let requestingUser = group.members.filter(member => member.user.toString() === req.user.id);
-        if (!requestingUser) {
+        if (!requestingUser[0]) {
             return res.status(400).json({ msg: 'User is not a member of this group'});
         }
-        if (requestingUser.host === false) {
+        if (requestingUser[0].host === false) {
             return res.status(401).json({ msg: 'You are not a host'});
         }
-
-        const removeIndex = group.stickied_posts.map(post => post.id).indexOf(req.params.post_id);
 
         group.stickied_posts.splice(removeIndex, 1);
 
@@ -304,39 +332,48 @@ router.delete('/posts/:group/:post_id', auth, async (req, res) => {
     }
 });
 
-// @route  PUT api/groups/addmember/:group_id/:profile_id
+// @route  PUT api/groups/members/:group_id/:profile_id
 // @desc   Add a member to the group
 // @access Private
 router.put('/members/:group_id/:profile_id', auth, async (req, res) => {
     try {
+        /* Fetch the group and member to add to the group */
         const group = await Group.findById(req.params.group_id);
+        const joiningProfile = await Profile.findById(req.params.profile_id);
+        let user = joiningProfile.user;
 
+        /* Check if the retrievals were successful */
         if (!group) {
-            return res.status(404).json({ msg: 'Group not found'});
+            return res.status(404).json({ msg: 'Group not found' });
+        }
+        if (!joiningProfile) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        if (!user) {
+            return res.status(404).json({ msg: 'Profile Error, cannot retrieve user' });
         }
 
         /* Make sure the user that sent the request is a host */
         let requestingUser = group.members.filter(member => member.user.toString() === req.user.id);
-        if (!requestingUser) {
+        if (!requestingUser[0]) {
             return res.status(400).json({ msg: 'User is not a member of this group'});
         }
-        if (requestingUser.host === false) {
+        if (requestingUser[0].host === false) {
             return res.status(401).json({ msg: 'You are not a host'});
         }
 
-        const user = await Profile.findById(req.params.profile_id).user;
-
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found'});
+        /* Make sure the user isn't already in the group */
+        let joiningUser = group.members.filter(member => member.user.toString() === user.toString());
+        if (joiningUser.length > 0) {
+            return res.status(401).json({ msg: 'Member already joined'});
         }
 
-        group.members.unshift({
+        /* Add the new member, save & return */
+        group.members.push({
             user: user,
             host: false
         });
-
         await group.save();
-
         res.json(group.members);
 
     } catch (err) {
@@ -345,38 +382,45 @@ router.put('/members/:group_id/:profile_id', auth, async (req, res) => {
     }
 });
 
-// @route  PUT api/groups/delmember/:group_id/:profile_id
+// @route  DELETE api/groups/members/:group_id/:profile_id
 // @desc   Remove a member from the group
 // @access Private
-router.put('/delmember/:group_id/:profile_id', auth, async (req, res) => {
+router.delete('/members/:group_id/:profile_id', auth, async (req, res) => {
     try {
+        /* Fetch the group and member to add to the group */
         const group = await Group.findById(req.params.group_id);
+        const leavingProfile = await Profile.findById(req.params.profile_id);
+        let user = leavingProfile.user;
 
+        /* Check if the retrievals were successful */
         if (!group) {
-            return res.status(404).json({ msg: 'Group not found'});
+            return res.status(404).json({ msg: 'Group not found' });
+        }
+        if (!leavingProfile) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        if (!user) {
+            return res.status(404).json({ msg: 'Profile Error, cannot retrieve user' });
         }
 
         /* Make sure the user that sent the request is a host */
         let requestingUser = group.members.filter(member => member.user.toString() === req.user.id);
-        if (!requestingUser) {
+        if (!requestingUser[0]) {
             return res.status(400).json({ msg: 'User is not a member of this group'});
         }
-        if (requestingUser.host === false) {
+        if (requestingUser[0].host === false) {
             return res.status(401).json({ msg: 'You are not a host'});
         }
 
-        // Get user ID, check if user exists
-        const user = await Profile.findById(req.params.profile_id).user;
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found'});
+        /* Make sure the user is already in the group */
+        const removeIndex = group.members.map(member => member.user).valueOf(user);
+        if (removeIndex < 0) {
+            return res.status(401).json({ msg: 'Member is not in the group'});
         }
 
-        // Find index of the member in the group then remove
-        const removeIndex = group.members.map(member => member.user).indexOf(user);
+        /* Remove the member, save & return */
         group.members.splice(removeIndex, 1);
-
         await group.save();
-
         res.json(group.members);
 
     } catch (err) {
@@ -389,7 +433,6 @@ router.put('/delmember/:group_id/:profile_id', auth, async (req, res) => {
 // @desc   Change the priviledge of a member (member -> host || host -> member)
 // @access Private
 router.put('/hostpriv/:group_id/:profile_id', auth, async (req, res) => {
-
     try {
         // Get group, check if group exists
         const group = await Group.findById(req.params.group_id);
@@ -398,10 +441,11 @@ router.put('/hostpriv/:group_id/:profile_id', auth, async (req, res) => {
         }
 
         // Get user ID, check if user exists
-        const user = await Profile.findById(req.params.profile_id).user;
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found'});
+        const profile = await Profile.findById(req.params.profile_id);
+        if (!profile) {
+            return res.status(404).json({ msg: 'Profile not found'});
         }
+        const { user } = profile;
 
         /* Make sure the user that sent the request is a host */
         let requestingUser = group.members.filter(member => member.user.toString() === req.user.id);
@@ -416,6 +460,7 @@ router.put('/hostpriv/:group_id/:profile_id', auth, async (req, res) => {
         // Don't let the founding host unhost themself through APi Requests, would cause the group
         // to forever exist and be mishandled. #TacklingEdgeCasesSinceDayOne
         const memberIndex = group.members.map(member => member.user.toString()).indexOf(user);
+        console.log(group.members.map(member => member.user.toString()));
         if (memberIndex !== 0) {
             group.members[memberIndex].host = !group.members[memberIndex].host;
         } else {
@@ -432,3 +477,5 @@ router.put('/hostpriv/:group_id/:profile_id', auth, async (req, res) => {
     }
 
 });
+
+module.exports = router;

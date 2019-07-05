@@ -7,6 +7,7 @@ const { check, validationResult } = require('express-validator/check');
 
 const Profile = require('../models/Profile');
 const Group = require('../models/Group');
+const User = require('../models/User');
 
 // @route  GET api/profile/me
 // @desc   Get current users profile
@@ -120,18 +121,17 @@ router.delete('/', auth, async (req, res) => {
         // Get the group of the profile
         // Get all events based on that group
         // Delete both the group and the events
-        /* ********TODO******** */
-
-        /* ********TODO******** */
-        // Test this route
+        // Test the route 
         /* ********TODO******** */
 
         // Remove Profile
         await Profile.findOneAndRemove({ user: req.user.id });
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
 
-        // Remove profile
+        // Remove profile and return
         await User.findOneAndRemove({ _id: req.user.id });
-        
         res.json({ msg: `User ${req.user.id} deleted`});
     } catch (err) {
         console.error(err.message);
@@ -139,44 +139,54 @@ router.delete('/', auth, async (req, res) => {
     }
 });
 
-// @route  PUT api/profiles/buddy/:buddy_id
+// @route  PUT api/profile/buddy/:buddy_id
 // @desc   Add buddy to profile
 // @access Private
 router.put('/buddy/:buddy_id', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
+        // Get the users profile and check if it exists
         const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
 
+        // Check if the user they're trying to 'add' exists
+        const user = await User.findById(req.params.buddy_id);
+        if (!user) {
+            return res.status(401).json({ msg: 'The user to friend does not exist' });
+        }
+
+        // Add the new buddy, save & return
         profile.buddies.unshift(req.params.buddy_id);
-
         await profile.save();
-
         res.json(profile);
+
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 });
 
-// @route  DELETE api/profiles/buddy/:buddy_id
+// @route  DELETE api/profile/buddy/:buddy_id
 // @desc   Delete buddy from profile
 // @access Private
 router.delete('/buddy/:buddy_id', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
+        // Get the user's profile and check if it exists  
         const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
 
-        // Get remove index
+        // Get remove index, see if they were buddies in the first place
         const removeIndex = profile.buddies.indexOf(req.params.buddy_id);
+        if (removeIndex < 0) {
+            return res.status(400).json({ msg: `You are not friends with ${req.params.buddy_id}`});
+        }
 
+        // Unfriend the buddy, save & return
         profile.buddies.splice(removeIndex, 1);
-
         await profile.save();
-
         res.json(profile);
 
     } catch (err) {
@@ -185,12 +195,75 @@ router.delete('/buddy/:buddy_id', auth, async (req, res) => {
     }
 })
 
-// @route  DELETE api/profiles/group/:group_id
-// @desc   Delete group from profile
-// @access Private
-
-// @route  PUT api/profiles/group
+// @route  PUT api/profile/group/:group_id
 // @desc   Add group to profile
 // @access Private
+router.put('/group/:group_id', auth, async (req, res) => {
+    try {
+        // Get profile and check if it exists
+        const profile = await Group.findById(req.user.id);
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
+
+        // Get group to check if it exists
+        const group = await Group.findById(req.params.group_id);
+        if (!group) {
+            return res.status(401).json({ msg: 'Server not found' });
+        }
+
+        // Verify that the user is joined in the group
+        let index = group.members.map(member => member.user).indexOf(req.params.group_id);
+        if (index < 0) {
+            return res.status(401).json({ msg: 'User is not part of this group'});
+        }
+
+        // Add the group to user's profile and save then return
+        profile.groups.unshift(req.params.group_id);
+        await profile.save();
+        res.json(profile);
+        
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+
+// @route  DELETE api/profile/group/:group_id
+// @desc   Delete group from profile
+// @access Private
+router.delete('/group/:group_id', auth, async (req, res) => {
+    try {
+
+        // Get profile and check if it exists
+        const profile = await Group.findById(req.user.id);
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
+
+        // Get group to check if it exists
+        const group = await Group.findById(req.params.group_id);
+        if (!group) {
+            return res.status(401).json({ msg: 'Server not found' });
+        }
+
+        // Verify that the user is joined in the group
+        let index = group.members.map(member => member.user).indexOf(req.params.group_id);
+        if (index < 0) {
+            return res.status(401).json({ msg: 'User is not part of this group'});
+        }
+
+        // Remove the user from the group, save & return
+        profile.groups.splice(index, 1);
+        await profile.save();
+        res.json(profile);
+
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
 
 module.exports = router;
