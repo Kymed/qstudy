@@ -17,7 +17,7 @@ var EventSchema = new mongoose.Schema({
         lng: Number,
         required: true
     },
-    time: Date
+    date: Date
 })
 
 var Event = mongoose.model('event', EventSchema);

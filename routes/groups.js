@@ -14,7 +14,7 @@ const User = require('../models/User');
 
 // @route  POST api/groups
 // @desc   Create or update a group
-// @access Public
+// @access Private
 router.post('/', [auth, [
     check('name', 'Name is required').not().isEmpty(),
     check('course', 'A course is required').not().isEmpty()

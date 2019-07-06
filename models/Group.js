@@ -19,7 +19,7 @@ const GroupSchema = new mongoose.Schema({
     stickied_posts: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'user',
         },
         name: String,
         post: String,
