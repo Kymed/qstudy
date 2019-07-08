@@ -112,26 +112,104 @@ router.get('/user/:user_id', async (req, res) => {
     }
 });
 
+// TEMPORARY TEST ROUTE TODO: Use then remove
+// @route  GET api/profile/groupsTheUserHosts
+// @desc   Gets all groups that the user hosts
+// @access Private
+router.get('/groupsTheUserHosts', auth, async (req, res) => {
+    try {
+        /* ********TODO******** */
+        // Test the route 
+        /* ********TODO******** */
+        const groups = await Group.find({ members: { user: req.user.id, host: true } });
+        res.json(groups);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// TEMPORARY TEST ROUTE TODO: Use then remove
+// @route  GET api/profile/groupsWhereUserIsOnlyHost
+// @desc   Gets all groups that the user is the only host
+// @access Private
+router.get('/groupsWhereUserIsOnlyHost', auth, async (req, res) => {
+    try {
+        /* ********TODO******** */
+        // Test the route 
+        /* ********TODO******** */
+
+        // Find the groups the user is the only host in, remove them
+        let remove = true;
+        const groups = await Group.find({ members: { user: req.user.id, host: true } });
+        const groupsToRemove = groups.filter(group => {
+
+            // For every group, filter out every group that doesn't have a host
+            remove = true;
+            group.members.foreach(member => {
+                if (member.host === True && member.user !== req.user.id) {
+                    remove = false;
+                }
+            });
+            return remove;
+
+        });
+
+        res.json(groupsToRemove);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route  DELETE api/profile
-// @desc   Delete profile, user & posts
+// @desc   Delete profile, user, groups, and events
 // @access Private
 router.delete('/', auth, async (req, res) => {
     try {
         /* ********TODO******** */
-        // Get the group of the profile
-        // Get all events based on that group
-        // Delete both the group and the events
         // Test the route 
         /* ********TODO******** */
 
-        // Remove Profile
-        await Profile.findOneAndRemove({ user: req.user.id });
+        // Find the profile and check if it exists
+        const profile = await Profile.findOne({ user: req.user.id });
         if (!profile) {
             return res.status(401).json({ msg: 'You did not make your profile yet' });
         }
 
-        // Remove profile and return
-        await User.findOneAndRemove({ _id: req.user.id });
+        // Find the groups the user is the only host in, remove them
+        let remove = true;
+        const groups = await Group.find({ members: { user: req.user.id, host: true } });
+        const groupsToRemove = groups.filter(group => {
+
+            // For every group, filter out every group that doesn't have a host
+            remove = true;
+            group.members.foreach(member => {
+                if (member.host === True && member.user !== req.user.id) {
+                    remove = false;
+                }
+            });
+            return remove;
+
+        });
+
+        // Get the IDs of the groups to remove
+        const groupsToRemoveIDs = groupsToRemove.map(group => group.id);
+
+        // Find all the events the group owns
+        const eventsToRemove = await Event.find({ group: { $in: groupsToRemoveIDs }})
+
+        // Delete the events and the groups
+        await eventsToRemove.remove();
+        await groupsToRemove.remove();
+
+        // Remove Profile & User
+        await profile.remove();
+        await User.findByIdAndRemove(req.user.id);
+
+        // Return
         res.json({ msg: `User ${req.user.id} deleted`});
     } catch (err) {
         console.error(err.message);
@@ -265,5 +343,18 @@ router.delete('/group/:group_id', auth, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+// @route  GET api/profile/invites
+// @desc   Get all group invites
+// @access Private
+
+// @route  PUT api/profile/invites/:group_id
+// @desc   Join the group in an invite
+// @access Private
+// Remember to make sure the invite exists
+
+// @route  DELETE api/profile/invites/:group_id
+// @desc   Remove an invite
+// @access Private
 
 module.exports = router;

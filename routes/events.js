@@ -14,13 +14,13 @@ const User = require('../models/User');
 router.post('/', [auth, [
     // TODO: See if there are validators for IDs, Lat/Lng, and Dates
     check('title', 'Title is required').not().isEmpty(),
-    check('course', 'Course is required').not().isEmpty(),
     check('group', 'Group ID is required').not().isEmpty(),
     check('lat', 'Latitude is required').not().isEmpty(),
     check('lng', 'Latitude is required').not().isEmpty(),
     check('date', 'Date & Time is required').not().isEmpty()
 ]], async (req, res) => {
 
+    // Check if there are errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -28,24 +28,39 @@ router.post('/', [auth, [
         })
     }
 
-    const { title, description, course, group, lat, lng, date, id } = req.body;
+    // Destructure the post request's body
+    const { title, description, group, lat, lng, date, id } = req.body;
 
+    // Check if the group for the event actually exists
     const groupDoc = await Group.findById(group);
     if (!groupDoc) {
         return res.status(404).json({ msg: 'Group is not found or invalid '});
     }
 
-    const eventFields = {};
+    /*
+        Add geocoding logic to make sure the lat and lng is in Kingston, ON
+    */
 
+    // Set the fields for the new event
+    const eventFields = {};
     if (title) eventFields.title = title;
     if (description) eventFields.description = description;
-    if (course) eventFields.course = course;
     if (group) eventFields.group = group;
-    if (lat) eventFields.lat = lat;
-    if (lng) eventFields.lng = lng;
-    if (date) eventFields.date = date;
+
+    eventFields.course = groupDoc.course;
+    if (date) { 
+        let dateTokens = date.split(',');
+        eventFields.date = Date.UTC(dateTokens[0],dateTokens[1],dateTokens[2],dateTokens[3],dateTokens[4],dateTokens[5]);
+    }
+    if (lat && lng) {
+        eventFields.location = {
+            lat,
+            lng
+        }
+    }
 
     try {
+        // If the event already exists, update it
         if (id) {
             let event = await Event.findByIdAndUpdate(id,
                 {
@@ -64,8 +79,8 @@ router.post('/', [auth, [
             }
 
             // See if the user sending the request is a host of the group which owns the event
-            const hosts = group.members.find({ host: true });
-            const hostIndex = hosts.map(host => host.user).valueOf(req.user.id);
+            const hosts = group.members.filter(member => member.host === true);
+            const hostIndex = hosts.map(host => host.user.toString()).indexOf(req.user.id);
             if (hostIndex < 0) {
                 return res.status(401).json({ msg: 'You are not a host of the group that owns this event'});
             }
@@ -73,6 +88,7 @@ router.post('/', [auth, [
             return res.json(event);
         }
 
+        // If the event doesn't exist, make the new one
         const newEvent = new Event(eventFields);
         const event = await newEvent.save();
 
@@ -125,10 +141,10 @@ router.get('/:id', auth, async (req, res) => {
 router.get('/new/:course', auth, async (req, res) => {
     try {
         // Delete all events that already happened
-        await Event.deleteMany({ date: { $lte: Date.now }});
+        await Event.deleteMany({ date: { $lte: Date.now() }});
         
         // Get all the events in the course
-        const events = Event.find({ course: req.params.course });
+        const events = await Event.find({ course: req.params.course });
         
         // Return the new events
         res.json(events);
@@ -148,7 +164,7 @@ router.delete('/:id', auth, async (req, res) => {
         // Get the event
         const event = await Event.findById(req.params.id);
         if (!event) {
-            return res.status(404).json({ msg: 'Group not found'});
+            return res.status(404).json({ msg: 'Event not found'});
         }
 
         // Get the group that owns the event
@@ -159,8 +175,8 @@ router.delete('/:id', auth, async (req, res) => {
         }
 
         // See if the user sending the request is a host of the group which owns the event
-        const hosts = group.members.find({ host: true });
-        const hostIndex = hosts.map(host => host.user).valueOf(req.user.id);
+        const hosts = group.members.filter(member => member.host === true);
+        const hostIndex = hosts.map(host => host.user.toString()).indexOf(req.user.id);
         if (hostIndex < 0) {
             return res.status(401).json({ msg: 'You are not a host of the group that owns this event'});
         }

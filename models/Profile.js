@@ -12,6 +12,10 @@ var ProfileSchema = mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'group'
     },
+    invites: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'group'
+    },
     buddies: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'user'

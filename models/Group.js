@@ -16,6 +16,10 @@ const GroupSchema = new mongoose.Schema({
         },
         host: Boolean
     }],
+    requests: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'user'
+    },
     stickied_posts: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,
@@ -27,9 +31,13 @@ const GroupSchema = new mongoose.Schema({
     }],
     max_members: Number,
     description: String,
+    public: {
+        type: Boolean,
+        default: false
+    },
     date_created: {
         type: Date,
-        default: Date.now
+        default: Date.now()
     }
 })
 

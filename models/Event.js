@@ -6,18 +6,29 @@ var EventSchema = new mongoose.Schema({
         required: true
     },
     description: String,
-    course: String,
+    course: {
+        type: String,
+        required: true
+    },
     group: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'group',
         required: true
     },
     location: {
-        lat: Number,
-        lng: Number,
-        required: true
+        lat: {
+            type: Number,
+            required: true
+        },
+        lng: {
+            type: Number,
+            required: true
+        }
     },
-    date: Date
+    date: {
+        type: Date,
+        required: true
+    }
 })
 
 var Event = mongoose.model('event', EventSchema);
