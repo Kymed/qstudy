@@ -9,6 +9,11 @@ const Profile = require('../models/Profile');
 const Group = require('../models/Group');
 const User = require('../models/User');
 
+/*
+    TODO: Delete adding groups & deleting group routes, and groups array in model.
+    Make an endpoint for querying groups by user.
+*/
+
 // @route  GET api/profile/me
 // @desc   Get current users profile
 // @access Private
@@ -112,16 +117,25 @@ router.get('/user/:user_id', async (req, res) => {
     }
 });
 
-// TEMPORARY TEST ROUTE TODO: Use then remove
-// @route  GET api/profile/groupsTheUserHosts
-// @desc   Gets all groups that the user hosts
+
+// @route  GET api/profile/groups
+// @desc   Gets all groups that the user is in
 // @access Private
-router.get('/groupsTheUserHosts', auth, async (req, res) => {
+// This O(N^2) Algo makes me uncomfortable but it's the best option right now
+// As array-subdoc querying is not working for me. At a scale this is unacceptable.
+router.get('/groups', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test the route 
-        /* ********TODO******** */
-        const groups = await Group.find({ members: { user: req.user.id, host: true } });
+
+        let allGroups = await Group.find().sort({ date: -1 });
+        let groups = new Array();
+        allGroups.some(group => {
+            group.members.some(member => {
+                if (member.user.toString() === req.user.id) {
+                    return groups.push(group);
+                }
+            })
+        });
+
         res.json(groups);
 
     } catch (err) {
@@ -130,90 +144,27 @@ router.get('/groupsTheUserHosts', auth, async (req, res) => {
     }
 });
 
-// TEMPORARY TEST ROUTE TODO: Use then remove
-// @route  GET api/profile/groupsWhereUserIsOnlyHost
-// @desc   Gets all groups that the user is the only host
+// @route  GET api/profile/groupsAsHost
+// @desc   Get all the groups in which the user hosts
 // @access Private
-router.get('/groupsWhereUserIsOnlyHost', auth, async (req, res) => {
+router.get('/groupsAsHost', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test the route 
-        /* ********TODO******** */
 
-        // Find the groups the user is the only host in, remove them
-        let remove = true;
-        const groups = await Group.find({ members: { user: req.user.id, host: true } });
-        const groupsToRemove = groups.filter(group => {
-
-            // For every group, filter out every group that doesn't have a host
-            remove = true;
-            group.members.foreach(member => {
-                if (member.host === True && member.user !== req.user.id) {
-                    remove = false;
+        let allGroups = await Group.find().sort({ date: -1 });
+        let groups = new Array();
+        allGroups.some(group => {
+            group.members.some(member => {
+                if (member.user.toString() === req.user.id && member.host === true) {
+                    return groups.push(group);
                 }
-            });
-            return remove;
-
+            })
         });
 
-        res.json(groupsToRemove);
+        res.json(groups);
 
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
-    }
-});
-
-// @route  DELETE api/profile
-// @desc   Delete profile, user, groups, and events
-// @access Private
-router.delete('/', auth, async (req, res) => {
-    try {
-        /* ********TODO******** */
-        // Test the route 
-        /* ********TODO******** */
-
-        // Find the profile and check if it exists
-        const profile = await Profile.findOne({ user: req.user.id });
-        if (!profile) {
-            return res.status(401).json({ msg: 'You did not make your profile yet' });
-        }
-
-        // Find the groups the user is the only host in, remove them
-        let remove = true;
-        const groups = await Group.find({ members: { user: req.user.id, host: true } });
-        const groupsToRemove = groups.filter(group => {
-
-            // For every group, filter out every group that doesn't have a host
-            remove = true;
-            group.members.foreach(member => {
-                if (member.host === True && member.user !== req.user.id) {
-                    remove = false;
-                }
-            });
-            return remove;
-
-        });
-
-        // Get the IDs of the groups to remove
-        const groupsToRemoveIDs = groupsToRemove.map(group => group.id);
-
-        // Find all the events the group owns
-        const eventsToRemove = await Event.find({ group: { $in: groupsToRemoveIDs }})
-
-        // Delete the events and the groups
-        await eventsToRemove.remove();
-        await groupsToRemove.remove();
-
-        // Remove Profile & User
-        await profile.remove();
-        await User.findByIdAndRemove(req.user.id);
-
-        // Return
-        res.json({ msg: `User ${req.user.id} deleted`});
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
     }
 });
 
@@ -273,33 +224,20 @@ router.delete('/buddy/:buddy_id', auth, async (req, res) => {
     }
 })
 
-// @route  PUT api/profile/group/:group_id
-// @desc   Add group to profile
+// @route  GET api/profile/invites
+// @desc   Get all group invites
 // @access Private
-router.put('/group/:group_id', auth, async (req, res) => {
+router.get('/invites', auth, async (req, res) => {
     try {
-        // Get profile and check if it exists
-        const profile = await Group.findById(req.user.id);
+
+        /* Get user & profile and check if profile exists */
+        const profile = await Profile.findOne({ user: req.user.id });
         if (!profile) {
-            return res.status(401).json({ msg: 'You did not make your profile yet' });
+            return res.status(404).json({ msg: 'Profile has not been created yet, make one' });
         }
 
-        // Get group to check if it exists
-        const group = await Group.findById(req.params.group_id);
-        if (!group) {
-            return res.status(401).json({ msg: 'Server not found' });
-        }
-
-        // Verify that the user is joined in the group
-        let index = group.members.map(member => member.user).indexOf(req.params.group_id);
-        if (index < 0) {
-            return res.status(401).json({ msg: 'User is not part of this group'});
-        }
-
-        // Add the group to user's profile and save then return
-        profile.groups.unshift(req.params.group_id);
-        await profile.save();
-        res.json(profile);
+        /* Query for the invites and return */
+        res.json(profile.invites);
         
     } catch (err) {
         console.error(err.message);
@@ -307,35 +245,124 @@ router.put('/group/:group_id', auth, async (req, res) => {
     }
 });
 
-
-// @route  DELETE api/profile/group/:group_id
-// @desc   Delete group from profile
+// @route  PUT api/profile/invites/:group_id
+// @desc   Join the group in an invite
 // @access Private
-router.delete('/group/:group_id', auth, async (req, res) => {
+router.put('/invites/:group_id', auth, async (req, res) => {
     try {
-
-        // Get profile and check if it exists
-        const profile = await Group.findById(req.user.id);
+        /* get the profile and check if it exists */
+        const profile = await Profile.findOne({ user: req.user.id });
         if (!profile) {
-            return res.status(401).json({ msg: 'You did not make your profile yet' });
+            return res.status(404).json({ msg: 'Profile not created yet'});
         }
 
-        // Get group to check if it exists
+        /* get the group and check if it exists */
         const group = await Group.findById(req.params.group_id);
         if (!group) {
-            return res.status(401).json({ msg: 'Server not found' });
+            return res.status(404).json({ msg: 'Group not found'});
         }
 
-        // Verify that the user is joined in the group
-        let index = group.members.map(member => member.user).indexOf(req.params.group_id);
-        if (index < 0) {
-            return res.status(401).json({ msg: 'User is not part of this group'});
+        /* Make sure the user isn't already in the group */
+        let joiningUser = group.members.filter(member => member.user.toString() === req.user.id.toString());
+        if (joiningUser.length > 0) {
+            return res.status(401).json({ msg: 'You are already in this group'});
         }
 
-        // Remove the user from the group, save & return
-        profile.groups.splice(index, 1);
+        /* Check if the invite actually exists */
+        let inviteIndex = profile.invites.map(invite => invite.toString()).indexOf(req.params.group_id);
+        if (inviteIndex < 0) {
+            return res.status(401).json({ msg: 'You were not sent an invite by this group' });
+        }
+
+        /* Check if the group has a set max_member count, and validate */
+        if (group.max_members) {
+            if (group.members.length === group.max_members) {
+                return res.status(400).json({ msg: 'Group\'s max member count as been reached' });
+            }
+        }
+
+        /* Because of my conditions in the endpoint, group requests
+        don't need to be resolved, cause you can't send an invite
+        if a member requested, as the two will cancel out and the user
+        will auto join the group
+        */
+
+        /* Add member and return */
+        profile.invites.splice(inviteIndex, 1);
+        group.members.push({ user: req.user.id, host: false });
+        await group.save();
         await profile.save();
-        res.json(profile);
+        res.json({ msg: `You have been added to ${group.name}`});
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route  DELETE api/profile/invites/:group_id
+// @desc   Remove an invite
+// @access Private
+router.delete('/invites/:group_id', auth, async (req, res) => {
+    try {
+
+        /* Get the profile and check if it exists */
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'You have not made your profile yet'});
+        }
+
+        /* Check if the invite exists */
+        let inviteIndex = profile.invites.map(invite => invite.toString()).indexOf(req.params.group_id);
+        if (inviteIndex < 0) {
+            return res.status(400).json({ msg: 'You did not recieve an invite from this group'});
+        }
+
+        /* Remove the invite and return */
+        profile.invites.splice(inviteIndex, 1);
+        await profile.save();
+        res.json({ msg: 'Invite successfully denied' });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route  POST api/profile/notifications/:profile_id
+// @desc   Send a new notification
+// @access Private
+router.post('/notifications/:profile_id', [auth, [
+    check('message').not().isEmpty()
+]], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array()
+            });
+        }
+
+        const fromProfile = await Profile.findOne({ user: req.user.id });
+        if (!fromProfile) {
+            return res.status(404).json({ msg: 'You have not created a profile yet' });
+        }
+
+        const toProfile = await Profile.findOne({ user: req.params.profile_id }).populate('user', ['name']);
+        if (!toProfile) {
+            return res.status(404).json({ msg: 'The profile you\'re sending to does not exist' });
+        }
+
+        const { message, group, event } = req.body;
+        const notificationFields = {};
+
+        if (message) notificationFields.message = message;
+        if (group) notificationFields.group = group;
+        if (event) notificationFields.event = event;
+
+        toProfile.notifications.push(notificationFields);
+        await toProfile.save();
+        res.json({ msg: `Notification successfully sent to ${toProfile.user.name}` });
 
 
     } catch (err) {
@@ -344,17 +371,48 @@ router.delete('/group/:group_id', auth, async (req, res) => {
     }
 });
 
-// @route  GET api/profile/invites
-// @desc   Get all group invites
+// @route  GET api/profile/notifications
+// @desc   Get all notifications
 // @access Private
+router.get('/notifications', auth, async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'You have not created your profile yet' });
+        }
+        console.log(profile);
+        res.json(profile.notifications);
 
-// @route  PUT api/profile/invites/:group_id
-// @desc   Join the group in an invite
-// @access Private
-// Remember to make sure the invite exists
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
-// @route  DELETE api/profile/invites/:group_id
-// @desc   Remove an invite
+// @route  DELETE api/profile/notifications/:id
+// @desc   Remove a notification
 // @access Private
+router.delete('/notifications/:id', auth, async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'Profile does not exist yet'});
+        }
+
+        let removeIndex = profile.notifications.map(notification => notification._id).indexOf(req.params.id);
+        if (removeIndex < 0) {
+            return res.status(400).json({ msg: 'Notification does not exist' });
+        }
+
+        profile.notifications.splice(removeIndex, 1);
+        await profile.save();
+        res.json({ msg: 'Notification successfully removed' });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 
 module.exports = router;

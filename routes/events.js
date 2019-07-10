@@ -5,8 +5,6 @@ const auth = require('../middleware/auth');
 
 const Group = require('../models/Group');
 const Event = require('../models/Event');
-const Profile = require('../models/Profile');
-const User = require('../models/User');
 
 // @route  POST api/events
 // @desc   Create or update an event

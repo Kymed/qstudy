@@ -1,5 +1,20 @@
 var mongoose = require('mongoose');
 
+var NotificationSchema = mongoose.Schema({
+    message: String,
+    from: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    },
+    group: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'group'
+    },
+    event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'event'
+    }
+});
 
 var ProfileSchema = mongoose.Schema({
     user: {
@@ -7,11 +22,9 @@ var ProfileSchema = mongoose.Schema({
         ref: 'user'
     },
     bio: String,
+    courses: [String],
+    year: Number,
     last_online: Date,
-    groups: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'group'
-    },
     invites: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'group'
@@ -20,8 +33,11 @@ var ProfileSchema = mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'user'
     },
-    courses: [String],
-    year: Number
+    requests: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'user'
+    },
+    notifications: [NotificationSchema]
 })
 
 var Profile = mongoose.model('profile', ProfileSchema);

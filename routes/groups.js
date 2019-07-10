@@ -18,6 +18,30 @@ const User = require('../models/User');
     join groups through join links, and join requests. Feedback is well welcomed.
 */
 
+/*
+    When I was a game programmer, I was a lot better at writing functions to
+    reuse code and increase modularity. My lack of this here is a huge flaw. 
+    The fear of modular functions in APis was developed when I was new to node
+    and not fully familiar with asynchronous actions, and I had some problems.
+    For those judging my code, hopefully this doesn't leave a bad impression.
+    I'm workin on it lol. At least I recognize it? :P
+    I'll probably break it up one day, I'd just have to retest everything,
+    and as you can tell, theres a lot of testing/cases for these many endpoints.
+*/
+
+/*
+    Architecture Notes to self:
+        - Never use unshift to add new members, member[0] (undeletable) is kept
+          as the origin host. Can only push to [members] in Group model.
+        - => If private, members can only be added if they're in the 'requests' array,
+          => If public, still use 'request' endpoint to add members, it will bypass and auto-add
+          => Hosts can invite members bypassing 'request' block by requesting to 'invite' endpoint,
+          => Public or Private, users can join if groupid in their invites array in Profile model
+          => Non-host members can request invites by using message-notification service, sending
+             Profiles ID to hosts. Maybe add an invite-only priveledge, would require some changes.
+        - Shoulder probably further advance validation across all routes.
+*/
+
 // @route  POST api/groups
 // @desc   Create or update a group
 // @access Private
@@ -33,13 +57,19 @@ router.post('/', [auth, [
         });
     }
 
-    const { name, course, description, max_members, id } = req.body;
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+        return res.status(404).json({ msg: 'Profile has not been created yet'});
+    }
+
+    const { name, course, description, max_members, public, id } = req.body;
     const groupFields = {};
 
     if (name) groupFields.name = name;
     if (course) groupFields.course = course;
     if (description) groupFields.description = description;
     if (max_members) groupFields.max_members = max_members;
+    if (public) groupFields.public = public;
 
     groupFields.members = [];
     groupFields.members.push({
@@ -91,14 +121,35 @@ router.get('/', auth, async (req, res) => {
 // @route  GET api/groups/byCourse
 // @route  Get all the groups by the user's course list
 // @access Private
+router.get('/byCourse', auth, async (req, res) => {
+    /* ********TODO******** */
+    // Test this route when well database is well populated
+    /* ********TODO******** */
+    try {
+        /* Get the profile and check if it exists */
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'Profile not created yet'});
+        }
+
+        /* Query groups by the courses the user is in */
+        const { courses } = profile;
+        const groups = await Group.find({ course: { $in: courses }});
+
+        /* Send back the query */
+        res.json(groups);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
 
 // @route  GET api/groups/byCourse/:id
 // @desc   Get all groups of a certain course
 // @access Private
 router.get('/byCourse/:course', auth, async (req, res) => {
-
     try {
-
         let groups = await Group.find({course: req.params.course});
 
         if (!groups) {
@@ -111,7 +162,6 @@ router.get('/byCourse/:course', auth, async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server error');
     }
-
 });
 
 // @route  GET api/groups/:id
@@ -141,10 +191,6 @@ router.get('/:id', auth, async (req, res) => {
 // @access Public
 router.get('/events/:group_id', auth, async (req, res) => {
     try {
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
-
         /* Get the group and check if it exists */
         const group = await Group.findById(req.params.group_id);
         if (!group) {
@@ -168,10 +214,7 @@ router.get('/events/:group_id', auth, async (req, res) => {
 // @access Private
 router.delete('/:id', auth, async (req, res) => {
 
-    try { 
-        /* ********TODO******** */
-        // Test this route
-        /* ********TODO******** */
+    try {   
         const group = await Group.findById(req.params.id);
         
         // If group doesn't exist
@@ -296,21 +339,17 @@ router.delete('/posts/:group_id/:post_id', auth, async (req, res) => {
     }
 });
 
-
 // @route  PUT api/groups/requests/:group_id
 // @desc   Add a member request 
 // @access Private
 router.put('/requests/:group_id', auth, async (req, res) => {
     try {
-        /************ TODO ************ */
-        /******* Test the route ******* */
-        /************ TODO ************ */
-
         // Check if the profile exists (User shouldn't be sending requests without a profile)
         const profile = await Profile.findOne({ user: req.user.id }).populate('user', ['name', 'avatar']);
         if (!profile) {
             return res.status(401).json({ msg: 'Make a profile before joining groups'});
         }
+        const user = await User.findById(req.user.id);
 
         // Get the group and check if it exists
         const group = await Group.findById(req.params.group_id);
@@ -319,16 +358,39 @@ router.put('/requests/:group_id', auth, async (req, res) => {
         }
 
         /* Make sure the user isn't already in the group */
-        let joiningUser = group.members.filter(member => member.user.toString() === user.toString());
+        let joiningUser = group.members.filter(member => member.user.toString() === req.user.id.toString());
         if (joiningUser.length > 0) {
             return res.status(401).json({ msg: 'Member already joined'});
+        }
+
+        /* Check if the group has a set max_member count, and validate */
+        if (group.max_members) {
+            if (group.members.length === group.max_members) {
+                return res.status(400).json({ msg: 'Group\'s max member count as been reached' });
+            }
         }
 
         // Check if the group is public, if so, just autojoin
         if (group.public === true) {
             group.members.push({ user: req.user.id, host: false });
             await group.save();
-            return res.json({ msg: `${profile.name} joined ${group.name}` });
+            return res.json({ msg: `${user.name} joined ${group.name}` });
+        }
+
+        /* Check if the user has a pending invite, let them in */
+        let inviteIndex = profile.invites.map(invite => invite.toString()).indexOf(req.params.group_id);
+        if (inviteIndex > -1) {
+            profile.invites.splice(inviteIndex, 1);
+            group.members.push({ user: req.user.id, host: false });
+            await profile.save();
+            await group.save();
+            return res.json({ msg: 'An invite was already sent to you, so we\'ll let you into the group' });
+        }
+
+        /* Check if they already sent a request */
+        let existingRequest = group.requests.filter(request => request.toString() === req.user.id.toString());
+        if (existingRequest.length > 0) {
+            return res.status(400).json({ msg: 'You have already sent a request to join this group'});
         }
 
         // Add the member request and save
@@ -347,12 +409,9 @@ router.put('/requests/:group_id', auth, async (req, res) => {
 // @access Private
 router.delete('/requests/:group_id/:user_id', auth, async (req, res) => {
     try {
-        /************ TODO ************ */
-        /******* Test the route ******* */
-        /************ TODO ************ */
 
         /* Check if user exists */
-        const user = User.findById(req.params.user_id);
+        const user = await User.findById(req.params.user_id);
         if (!user) {
             return res.status(404).json({ msg: 'User does not exist' });
         }
@@ -394,15 +453,12 @@ router.delete('/requests/:group_id/:user_id', auth, async (req, res) => {
 // @access Private
 router.put('/invite/:group_id/:profile_id', auth, async (req, res) => {
     try {
-        /************ TODO ************ */
-        /******* Test the route ******* */
-        /************ TODO ************ */
-        
         /* Check if user exists */
-        const profile = Profile.findById(req.params.profile_id);
+        const profile = await Profile.findById(req.params.profile_id);
         if (!profile) {
-            return res.status(404).json({ msg: 'User does not exist' });
+            return res.status(404).json({ msg: 'Profile does not exist' });
         }
+        const user = await User.findById(profile.user);
 
         /* Get group, check if group exists */
         const group = await Group.findById(req.params.group_id);
@@ -419,10 +475,38 @@ router.put('/invite/:group_id/:profile_id', auth, async (req, res) => {
             return res.status(401).json({ msg: 'You are not a host'});
         }
 
+        /* Make sure the user isn't already in the group */
+        let joiningUser = group.members.filter(member => member.user.toString() === profile.user.toString());
+        if (joiningUser.length > 0) {
+            return res.status(400).json({ msg: 'Member is already in the group'});
+        }
+
+        /* Check if the group has a set max_member count, and validate */
+        if (group.max_members) {
+            if (group.members.length === group.max_members) {
+                return res.status(400).json({ msg: 'Group\'s max member count as been reached' });
+            }
+        }
+
+        /* Check if an invite was already sent */
+        let existingInvite = profile.invites.filter(invite => invite.toString() === req.params.group_id);
+        if (existingInvite.length > 0) {
+            return res.status(400).json({ msg: 'This user already has a pending invite for this group'});
+        }
+        
+        /* Check if they sent a request to join the group, just let them in */
+        let requestIndex = group.requests.map(request => request.toString()).indexOf(profile.user.toString());
+        if (requestIndex > -1) {
+            group.requests.splice(requestIndex, 1);
+            group.members.push({ user: user.id, host: false });
+            await group.save();
+            return res.json({ msg: `${user.name} sent a request already so ${user.name} has been added to the group`});
+        }
+
         /* Send the invite */
         profile.invites.unshift(req.params.group_id);
         await profile.save();
-        res.json({ msg: `Invite was sent to ${profile.name}`});
+        res.json({ msg: `Invite was sent to ${user.name}`});
 
     } catch (err) {
         console.error(err.message);
@@ -435,9 +519,6 @@ router.put('/invite/:group_id/:profile_id', auth, async (req, res) => {
 // @access Private
 router.put('/members/:group_id/:profile_id', auth, async (req, res) => {
     try {
-        /************ TODO ************ */
-        /******* Test the route ******* */
-        /************ TODO ************ */
 
         /* Fetch the group and member to add to the group */
         const group = await Group.findById(req.params.group_id);
@@ -467,7 +548,14 @@ router.put('/members/:group_id/:profile_id', auth, async (req, res) => {
         /* Make sure the user isn't already in the group */
         let joiningUser = group.members.filter(member => member.user.toString() === user.toString());
         if (joiningUser.length > 0) {
-            return res.status(401).json({ msg: 'Member already joined'});
+            return res.status(400).json({ msg: 'Member already joined'});
+        }
+
+        /* Check if the group has a set max_member count, and validate */
+        if (group.max_members) {
+            if (group.members.length === group.max_members) {
+                return res.status(400).json({ msg: 'Group\'s max member count as been reached' });
+            }
         }
 
         /* Make sure the user actually asked to join in the first place */
