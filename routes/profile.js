@@ -168,6 +168,129 @@ router.get('/groupsAsHost', auth, async (req, res) => {
     }
 });
 
+router.get('/ttestt', auth, async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.user.id });
+
+        profile.buddies.splice(0, 1);
+
+        await profile.save();
+
+        res.send('ye buddy');
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route  GET api/profile/request
+// @desc   Get friend requests
+// @access Private
+router.get('/request', auth, async (req, res) => {
+    try {
+        //test
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'You have not created your profile yet' });
+        }
+
+        res.json(profile.requests);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route  PUT api/profile/request/:profile_id
+// @desc   Send a buddy request
+// @access Private
+router.put('/request/:profile_id', auth, async (req, res) => {
+    try {
+        /* Pull out profile and check if it exists */
+        const fromProfile = await Profile.findOne({ user: req.user.id });
+        if (!fromProfile) {
+            return res.status(404).json({ msg: 'You have not created a profile yet'});
+        }
+
+        /* Check if its the same person */
+        if (fromProfile._id.toString() === req.params.profile_id) {
+            return res.status(401).json({ msg: 'Lol thats you, what are you doing'});
+        }
+
+        /* Pull out profile theyre requesting to and check if it exists */
+        const toProfile = await Profile.findById(req.params.profile_id).populate('user', ['name']);
+        if (!toProfile) {
+            return res.status(404).json({ msg: 'The user you\'re requesting to does not exist' });
+        }
+        const toUser = toProfile.user._id;
+
+        /* Check if they're friends already */
+        let friendIndex = toProfile.buddies.map(buddy => buddy.toString()).indexOf(req.user.id);
+        if (friendIndex > -1) {
+            return res.status(401).json({ msg: 'You are already friends with this user' });
+        }
+        
+        /* Check if the request was sent already */
+        let requestIndex = toProfile.requests.map(request => request.toString()).indexOf(req.user.id);
+        if (requestIndex > -1) {
+            return res.status(401).json({ msg: 'You have already sent a friend request' });
+        }
+        
+        /* Check if a request was sent back already, cancel both requests and make them friends */
+        requestIndex = fromProfile.requests.indexOf(toUser);
+        if (requestIndex > -1) {
+            fromProfile.requests.splice(requestIndex, 1);
+            fromProfile.buddies.unshift(toUser);
+            toProfile.buddies.unshift(req.user.id);
+            await fromProfile.save();
+            await toProfile.save();
+            return res.json({ msg: `${toProfile.user.name} already sent a request to you, so now you're friends` });
+        }
+
+        /* Send the request */
+        toProfile.requests.unshift(req.user.id);
+        await toProfile.save();
+        res.json({ msg: `Buddy request successfully sent to ${toProfile.user.name}`});
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route  DELETE api/profile/request/:profile_id
+// @desc   Decline a buddy request
+// @access Private
+router.delete('/request/:profile_id', auth, async (req, res) => {
+    try {
+        /* Pull out the profile and check if it exists */
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(404).json({ msg: 'You have not created a profile yet'});
+        }
+
+        /* Pull out their profile and get their user */
+        const reqProfile = await Profile.findById(req.params.profile_id);
+        const reqUser = reqProfile.user;
+
+        /* Check if the request exists */
+        let removeIndex = profile.requests.indexOf(reqUser);
+        if (removeIndex < 0) {
+            return res.status(401).json({ msg: 'This user has not sent a request to you'});
+        }
+
+        /* Remove the request and return */
+        profile.requests.splice(removeIndex, 1);
+        await profile.save();
+        res.json({ msg: 'Buddy request has been declined'});
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route  PUT api/profile/buddy/:buddy_id
 // @desc   Add buddy to profile
 // @access Private
@@ -179,16 +302,25 @@ router.put('/buddy/:buddy_id', auth, async (req, res) => {
             return res.status(401).json({ msg: 'You did not make your profile yet' });
         }
 
-        // Check if the user they're trying to 'add' exists
-        const user = await User.findById(req.params.buddy_id);
-        if (!user) {
-            return res.status(401).json({ msg: 'The user to friend does not exist' });
+        // Get their profile and check if their profile exists
+        const buddyProfile = await Profile.findById(req.params.buddy_id);
+        if (!buddyProfile) {
+            return res.status(404).json({ msg: 'Cannot add, their profile does not exist' });
+        }
+
+        // Check if the friend request was sent
+        let removeIndex = profile.requests.indexOf(buddyProfile.user);
+        if (removeIndex < 0) {
+            return res.status(401).json({ msg: 'The user did not send a request to you'  });
         }
 
         // Add the new buddy, save & return
-        profile.buddies.unshift(req.params.buddy_id);
+        profile.requests.splice(removeIndex, 1);
+        profile.buddies.unshift(buddyProfile.user);
+        buddyProfile.buddies.unshift(req.user.id);
+        await buddyProfile.save();
         await profile.save();
-        res.json(profile);
+        res.json(profile.buddies);
 
     } catch (err) {
         console.error(err.message);
@@ -207,16 +339,29 @@ router.delete('/buddy/:buddy_id', auth, async (req, res) => {
             return res.status(401).json({ msg: 'You did not make your profile yet' });
         }
 
+        // Get the buddies profile and check if it exists
+        const buddyProfile = await Profile.findById(req.params.buddy_id);
+        if (!buddyProfile) {
+            return res.status(401).json({ msg: 'Profile not found, You are not friends with this person' });
+        }
+
         // Get remove index, see if they were buddies in the first place
-        const removeIndex = profile.buddies.indexOf(req.params.buddy_id);
+        const removeIndex = profile.buddies.indexOf(buddyProfile.user);
         if (removeIndex < 0) {
-            return res.status(400).json({ msg: `You are not friends with ${req.params.buddy_id}`});
+            return res.status(400).json({ msg: 'You are not friends with this person'});
+        }
+
+        // Remove user from their friends list
+        const removeIndex2 = buddyProfile.buddies.map(buddy => buddy.toString()).indexOf(req.user.id);
+        if (removeIndex > -1) {
+            buddyProfile.buddies.splice(removeIndex2, 1);
+            await buddyProfile.save();
         }
 
         // Unfriend the buddy, save & return
         profile.buddies.splice(removeIndex, 1);
         await profile.save();
-        res.json(profile);
+        res.json(profile.buddies);
 
     } catch (err) {
         console.error(err.message);
@@ -399,7 +544,7 @@ router.delete('/notifications/:id', auth, async (req, res) => {
             return res.status(404).json({ msg: 'Profile does not exist yet'});
         }
 
-        let removeIndex = profile.notifications.map(notification => notification._id).indexOf(req.params.id);
+        let removeIndex = profile.notifications.map(notification => notification._id.toString()).indexOf(req.params.id);
         if (removeIndex < 0) {
             return res.status(400).json({ msg: 'Notification does not exist' });
         }
