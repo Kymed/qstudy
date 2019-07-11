@@ -4,6 +4,7 @@ const config = require('config');
 const router = express.Router();
 const auth = require('../middleware/auth')
 const { check, validationResult } = require('express-validator/check');
+const pushNotification = require('../utils/notification');
 
 const Profile = require('../models/Profile');
 const Group = require('../models/Group');
@@ -168,20 +169,32 @@ router.get('/groupsAsHost', auth, async (req, res) => {
     }
 });
 
-router.get('/ttestt', auth, async (req, res) => {
+/*
+// @route  GET api/profile/testNotification
+// @desc   Test the notification utility function
+// @access Private
+router.get('/testNotification', auth, async (req, res) => {
     try {
-        const profile = await Profile.findOne({ user: req.user.id });
+        let profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            res.status(404).json({ msg: 'Profile not found' });
+        }
 
-        profile.buddies.splice(0, 1);
+        let notification = {
+            message: "woop",
+            group: "5d264e314a38a25ce6e65ea2"
+        }
 
-        await profile.save();
+        profile = await pushNotification(notification, profile._id);
 
-        res.send('ye buddy');
+        res.json(profile.notifications);
+
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
     }
 });
+*/
 
 // @route  GET api/profile/request
 // @desc   Get friend requests
@@ -212,6 +225,8 @@ router.put('/request/:profile_id', auth, async (req, res) => {
         if (!fromProfile) {
             return res.status(404).json({ msg: 'You have not created a profile yet'});
         }
+
+        const fromUser = await User.findById(fromProfile.user);
 
         /* Check if its the same person */
         if (fromProfile._id.toString() === req.params.profile_id) {
@@ -251,6 +266,12 @@ router.put('/request/:profile_id', auth, async (req, res) => {
         /* Send the request */
         toProfile.requests.unshift(req.user.id);
         await toProfile.save();
+
+        await pushNotification({
+            message: `You have recieved a study buddy request from ${fromUser.name}`,
+            profile: `${fromProfile._id}`
+        }, toProfile._id);
+
         res.json({ msg: `Buddy request successfully sent to ${toProfile.user.name}`});
 
     } catch (err) {
@@ -450,7 +471,6 @@ router.put('/invites/:group_id', auth, async (req, res) => {
 // @access Private
 router.delete('/invites/:group_id', auth, async (req, res) => {
     try {
-
         /* Get the profile and check if it exists */
         const profile = await Profile.findOne({ user: req.user.id });
         if (!profile) {
@@ -498,12 +518,13 @@ router.post('/notifications/:profile_id', [auth, [
             return res.status(404).json({ msg: 'The profile you\'re sending to does not exist' });
         }
 
-        const { message, group, event } = req.body;
+        const { message, group, user, event } = req.body;
         const notificationFields = {};
 
         if (message) notificationFields.message = message;
         if (group) notificationFields.group = group;
         if (event) notificationFields.event = event;
+        if (user) notificationFields.user = user;
 
         toProfile.notifications.push(notificationFields);
         await toProfile.save();

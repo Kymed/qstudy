@@ -8,6 +8,8 @@ const Event = require('../models/Event');
 const Profile = require('../models/Profile');
 const User = require('../models/User');
 
+const pushNotification = require('../utils/notification');
+
 /*
     Tried my best to think critically and maximize the APi design to be practical,
     and for the flow to be defended if people were interfacing the APi directly
@@ -506,6 +508,12 @@ router.put('/invite/:group_id/:profile_id', auth, async (req, res) => {
         /* Send the invite */
         profile.invites.unshift(req.params.group_id);
         await profile.save();
+
+        await pushNotification({
+            message: `You have been invited to join ${group.name}`,
+            group: group._id
+        }, profile._id);
+
         res.json({ msg: `Invite was sent to ${user.name}`});
 
     } catch (err) {

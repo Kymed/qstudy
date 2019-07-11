@@ -3,6 +3,16 @@ const connectDB = require('./config/db');
 
 const app = express();
 
+/*
+    This was a large APi and one of my first fully completed things.
+    You'll notice lots of eh code, lots of better code.
+    As I was working on it, I increasingly got better at this.
+    I could of turn a lot of repeated code into some of those 'utils' functions.
+    I refactored what was most necessary (a big difference).
+    Lots of endpoints, lots of test cases (using postman), lots of fun.
+    -  Kymed
+*/
+
 // connect database
 connectDB();
 
