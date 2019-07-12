@@ -41,7 +41,7 @@ const pushNotification = require('../utils/notification');
           => Public or Private, users can join if groupid in their invites array in Profile model
           => Non-host members can request invites by using message-notification service, sending
              Profiles ID to hosts. Maybe add an invite-only priveledge, would require some changes.
-        - Shoulder probably further advance validation across all routes.
+        - Should probably further advance validation across all routes.
 */
 
 // @route  POST api/groups
