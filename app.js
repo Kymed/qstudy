@@ -9,6 +9,9 @@ const app = express();
     As I was working on it, I increasingly got better at this.
     I could of turn a lot of repeated code into some of those 'utils' functions.
     I refactored what was most necessary (a big difference).
+    Lots of opportunities I could of made my own middleware like for verifying
+    if the requesting user of endpoints involving group changes was a host of that
+    group. Doesn't make a big difference though, just better practice. Next time.
     Lots of endpoints, lots of test cases (using postman), lots of fun.
     -  Kymed
 */
