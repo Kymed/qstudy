@@ -35,4 +35,4 @@ module.exports = async (notification, profileid) => {
             reject('Error sending notification');
         }
     });
-}
+} 
