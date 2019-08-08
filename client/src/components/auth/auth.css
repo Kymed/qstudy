@@ -1,0 +1,96 @@
+form label{
+    display: block !important;
+    width: 300px;
+    margin-top: 12px;
+    /*margin-bottom: -12px;*/
+    color: #000;
+    background-color: transparent;
+    margin-bottom: 5px;
+}
+form input{
+    display: block !important;
+    width: 300px;
+    border-radius: 5px;
+    height: 30px !important;
+    box-shadow: none;
+    outline: none;
+    border: none;
+    padding-left: 12px;
+    margin-bottom: 5px;
+}
+form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+form a:last-of-type:hover{
+    color: #1E7A93;}
+.register-btn{
+    margin-top: 24px;
+}
+.register-btn input{
+    width: 200px;
+}
+.sign-up-wrap{
+    /*background-color: firebrick;*/
+    width: 100%;
+    height: 120vh;
+    padding: 48px 72px 48px 72px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+.sign-up-form{
+    display: block;
+    flex: 1;
+    /*background-color: aqua;*/
+    height: 100%;
+    position: relative;
+    border-radius: 0 10px 10px 0;
+}
+.sign-up-form form{
+    height: 100%;
+    width: 100%;
+    background-color: magenta;
+    height: 75%;
+    border-radius: 0 0 10px 0;
+}
+
+
+.form-title {
+    font-size: 36px;
+    margin-bottom: 1rem;
+}
+
+
+/*TEXT*/
+.sign-up-form h1{
+    /*padding: 48px;*/
+    color: #000;
+    height: 25%;
+    border-radius: 0 10px 0 0;
+}
+
+
+/*left side of the screen*/
+.sign-up-img{
+    flex: 1;
+    height: 100%;
+    border-radius: 10px 0 0 10px;
+    background: url("../pictures/regis.jpg") no-repeat;
+    -webkit-background-size: cover;
+    background-size: cover;
+    background-position: center;
+}
+
+
+
+@media only screen and (max-width: 767px) {
+    .sign-up-img{
+        display: none;
+    }
+    .sign-up-form{border-radius: 10px;}
+    .sign-up-form h1{border-radius: 10px 10px 0 0;}
+    .sign-up-form form{border-radius: 0 0 10px 10px;}
+}
