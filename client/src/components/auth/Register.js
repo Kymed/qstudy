@@ -64,12 +64,13 @@ const Register = props => {
                             <input type="text" name="name" id="name" placeholder="Name" className="input" value={name} onChange={onChange}/>
                             <label htmlFor="email">Email</label>
                             <input name="email" type="email" id="email" placeholder="Email" className="input" value={email} onChange={onChange}/>
+                            <h2 className="small"> Our site uses gravatar </h2>
                             <label htmlFor="password">Password</label>
                             <input name="password" type="password" id="password" placeholder="Password" className="input" value={password} onChange={onChange}/>
                             <label htmlFor="password">Confirm Password</label>
                             <input name="password2" type="password" id="password" placeholder="Password" className="input" value={password2} onChange={onChange}/>
-                            <a href="#" class="register-btn">
-                                <input type="submit" value="Sign up" class="btn-primary"/>
+                            <a href="#" className="register-btn">
+                                <input type="submit" value="Sign up" className="btn-primary"/>
                             </a>
                             <Link to="/login">Log in!</Link>
                         </form>

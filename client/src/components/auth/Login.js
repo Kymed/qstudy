@@ -1,22 +1,25 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
-import AuthContext from '../../context/auth/authContext';
 import { Link } from 'react-router-dom';
-
 import './auth.css';
+
+import AuthContext from '../../context/auth/authContext';
+import AlertContext from '../../context/alert/alertContext';
 
 const Login = props => {
     const authContext = useContext(AuthContext);
+    const alertContext = useContext(AlertContext);
 
-    const [alert, setAlert] = useState('');
     const { login, error, clearErrors, isAuthenticated } = authContext;
+    const { setAlert } = alertContext;
 
     useEffect(() => {
+
         if (isAuthenticated) {
             props.history.push('/home');
         }
-
-        if (error === 'Invalid Credentials') {
-            setAlert(error);
+        
+        if (error === 'invalid credentials') {
+            setAlert('Wrong email or password', 'danger');
             clearErrors();
         }
 
@@ -34,8 +37,10 @@ const Login = props => {
 
     const onSubmit = e => {
         e.preventDefault();
-        if (email === null || password === null) {
-            setAlert('Please fill in all fields');
+        if (email === '') {
+            setAlert("Please enter an email", "danger");
+        } else if (password === '') {
+            setAlert("Please enter a password", "danger");
         } else {
             login({
                 email,
@@ -49,12 +54,11 @@ const Login = props => {
             <div className="container text-center">
                 <div className="sign-in-form card-lg">
                     <h1 className="text-center form-title"> Sign in </h1>
-                    <h2> {alert} </h2>
                     <form onSubmit={onSubmit}>
                         <label htmlFor="email">Email</label>
-                        <input name="email" type="email" id="email" placeholder="Email" class="input" value={email} onChange={onChange}/>
+                        <input name="email" type="email" id="email" placeholder="Email" className="input" value={email} onChange={onChange}/>
                         <label htmlFor="password">Password</label>
-                        <input name="password" type="password" id="password" placeholder="Password" class="input" value={password} onChange={onChange}/>
+                        <input name="password" type="password" id="password" placeholder="Password" className="input" value={password} onChange={onChange}/>
                         <a href="#" className="register-btn">
                             <input type="submit" value="Sign in" className="btn-primary" />
                         </a>

@@ -25,7 +25,7 @@ router.get('/me', auth, async (req, res) => {
                                 ['name', 'avatar']);
         
         if(!profile) {
-            return res.status(400).json({ msg: 'There is no profile for this user'});
+            return res.status(400).json({ msg: 'Profile does not exist'});
         }
 
         res.json(profile); 
@@ -117,7 +117,6 @@ router.get('/user/:user_id', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 // @route  GET api/profile/groups
 // @desc   Gets all groups that the user is in

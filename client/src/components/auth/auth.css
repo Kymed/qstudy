@@ -1,9 +1,11 @@
+
+
 form label{
     display: block !important;
     width: 300px;
     margin-top: 12px;
     /*margin-bottom: -12px;*/
-    color: #000;
+    color: #050505;
     background-color: transparent;
     margin-bottom: 5px;
 }
@@ -17,6 +19,7 @@ form input{
     border: none;
     padding-left: 12px;
     margin-bottom: 5px;
+    background-color: #ECE7E8;
 }
 form{
     display: flex;
@@ -61,6 +64,7 @@ form a:last-of-type:hover{
 .form-title {
     font-size: 36px;
     margin-bottom: 1rem;
+    color: #AA0A1E;
 }
 
 
@@ -72,16 +76,9 @@ form a:last-of-type:hover{
     border-radius: 0 10px 0 0;
 }
 
-
-/*left side of the screen*/
-.sign-up-img{
-    flex: 1;
-    height: 100%;
-    border-radius: 10px 0 0 10px;
-    background: url("../pictures/regis.jpg") no-repeat;
-    -webkit-background-size: cover;
-    background-size: cover;
-    background-position: center;
+.small {
+    font-size: .75rem;
+    font-weight: 100;
 }
 
 
