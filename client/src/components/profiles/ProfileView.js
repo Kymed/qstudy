@@ -3,13 +3,12 @@ import React, { Fragment, useContext, useEffect } from 'react';
 import ProfileContext from '../../context/profiles/profileContext';
 
 const ProfileView = ( {profile} ) => {
-    const { name, bio, year, courses } = profile;
-    let courseElements;
-    useEffect(() => {
-        courseElements = courses.map((course, index) =>
-            <li key={index}> {course} </li>
-        );
-    }, []);
+    const { user, bio, year, courses } = profile;
+    const { avatar } = user;
+
+    let courseElements = courses.map((course, index) =>
+    <li key={index} className="profile-text"> {course} </li>
+    );
 
     const profileContext = useContext(ProfileContext);
 
@@ -18,22 +17,23 @@ const ProfileView = ( {profile} ) => {
     }
 
     return (
-        <Fragment>
-            <h1 className="profile-label"> Welcome, {name} </h1>
+        <div className="profile-view">
+            <div className="card-md profile-card">
+                <div className="profile-header">
+                    <h1 className="profile-text"> Welcome, {user.name} </h1>
 
-            <h2 className="profile-sublabel"> Bio: {bio} </h2>
+                    <img className="avatar" src={avatar} alt='' />
+                </div>
 
-            <h2 className="profile-sublabel"> Year: {year} </h2>
+                <div className="profile-info">
+                    <h2 className="profile-text"> {bio} </h2>
+                    <h2 className="profile-text2"> Year: {year} </h2>
+                    <ul className="course-list"> {courseElements} </ul>
+                </div>
+            </div>
 
-            {/* Display the courses they're enrolled in */}
-            <p className="profile-p"> 
-                You're enrolled in </p>
-                <ul className="course-list">
-                    {courseElements}
-                </ul>
-
-            <button className="btn-primary" onClick={editProfile}> Edit Profile </button>
-        </Fragment>
+            <button className="btn-dash" onClick={editProfile}> Edit Profile </button>
+        </div>
     )
 }
 

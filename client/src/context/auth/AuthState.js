@@ -107,7 +107,7 @@ const AuthState = props => {
             isAuthenticated: state.isAuthenticated,
             loading: state.loading,
             user: state.user,
-            error: state.token,
+            error: state.error,
             register,
             loadUser,
             login,

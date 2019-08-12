@@ -40,7 +40,25 @@ router.get('/me', auth, async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('courses', 'Courses are required').not().isEmpty(),
-    check('year', 'A year is required').not().isEmpty()
+    check('year', 'A year is required').not().isEmpty(),
+    check('courses', 'Invalid course code').custom(value => {
+        return () => {
+            let courses = value.split(',').map(token => token.trim());
+            let count = 0;
+            courses.forEach(course => {
+                for (var i = 0; i < course.length; i++) {
+                    if (!(course.charAt(i) >= '0' && course.charAt(i) <= '9') && course.charAt(i) === course.charAt(i).toLowerCase()) {
+                        return Promise.reject('Course codes must have uppercase letters');
+                    }
+                    if (course.charAt(i) === " ") {
+                        return Promise.reject('Invalid course code (Coursecodes are one word)');
+                    }
+                    count += 1;
+                    course.log(count);
+                }
+            })
+        };
+    })
 ]], async (req, res) => {
 
     const errors = validationResult(req);
@@ -54,9 +72,30 @@ router.post('/', [auth, [
     profileFields.user = req.user.id;
 
     if (bio) profileFields.bio = bio;
-    if (year) profileFields.year = year;
+    if (year) {
+        if (year.length !== 4) {
+            return res.status(400).json({msg : 'Invalid year'});
+        }
+        for (var i = 0; i < year.length; i++) {
+            if (!(year.charAt(i) >= '0' && year.charAt(i) <= '9')) {
+                return res.status(400).json({ msg: 'Invalid year' });
+            }
+        }
+        profileFields.year = year;
+    }
 
     if (courses) {
+        courses.split(',').map(token => token.trim()).forEach(course => {
+            if (course === "") {
+                return res.status(400).json({ msg: 'Only include course entries'});
+            }
+            for (var i = 0; i < course.length; i++) {
+                if (!(course.charAt(i) >= '0' && course.charAt(i) <= '9') && course.charAt(i) === course.charAt(i).toLowerCase()) {
+                    return res.status(400).json({ msg: 'No lowercase letters & no spaces' });
+                }
+            }
+        });
+
         profileFields.courses = courses.split(',').map(course => course.trim());
     }
 

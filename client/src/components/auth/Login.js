@@ -13,13 +13,13 @@ const Login = props => {
     const { setAlert } = alertContext;
 
     useEffect(() => {
-
+        
         if (isAuthenticated) {
             props.history.push('/home');
         }
         
-        if (error === 'invalid credentials') {
-            setAlert('Wrong email or password', 'danger');
+        if (error !== null) {
+            setAlert(error, 'danger');
             clearErrors();
         }
 

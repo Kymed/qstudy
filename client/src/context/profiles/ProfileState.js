@@ -3,7 +3,6 @@ import axios from 'axios';
 import ProfileContext from './profileContext';
 import profileReducer from './profileReducer';
 
-
 import { CLEAR_ERRORS, INITIATE_EDITING, LOGOUT, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED, PROFILE_NOT_EXISTS } from '../types';
 
 const ProfileState = props => {
@@ -57,7 +56,7 @@ const ProfileState = props => {
             loadProfile();
         } catch (err) {
             if (state.profile !== null) {
-                dispatch({
+                return dispatch({
                     type: PROFILE_USER_FAIL,
                     payload: err.response.data.msg
                 })

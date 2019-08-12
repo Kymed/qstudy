@@ -2,22 +2,23 @@ import React, { useState, useContext, useEffect, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 
 import AuthContext from '../../context/auth/authContext';
+import AlertContext from '../../context/alert/alertContext';
 
 import './auth.css';
 
 const Register = props => {
     const authContext = useContext(AuthContext);
+    const alertContext = useContext(AlertContext);
 
     const { register, error, clearErrors, isAuthenticated } = authContext;
-
-    const [alert, setAlert] = useState('');
+    const { setAlert } = alertContext;
 
     useEffect(() => {
         if (isAuthenticated) {
             props.history.push('/home');
         }
 
-        if (error === 'User already exists') {
+        if (error !== null) {
             setAlert(error, 'danger');
             clearErrors();
         }
@@ -39,16 +40,15 @@ const Register = props => {
     const onSubmit = e => {
         e.preventDefault();
         if (name === '' || email === '' || password === '') {
-            setAlert('Please enter all fields');
+            setAlert('Please enter all fields', 'danger');
         } else if (password !== password2) {
-            setAlert('Passwords do not match');
+            setAlert('Passwords do not match', 'danger');
         } else {
             register({
                 name, 
                 email,
                 password
             })
-            setAlert('success');
         }
     }
 

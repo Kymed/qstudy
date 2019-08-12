@@ -1,6 +1,7 @@
-import React, { useState, useContext, Fragment } from 'react'
+import React, { useState, useEffect, useContext, Fragment } from 'react'
 
 import ProfileContext from '../../context/profiles/profileContext';
+import AlertContext from '../../context/alert/alertContext';
 
 let emptyProfile = {
     bio: "",
@@ -8,14 +9,28 @@ let emptyProfile = {
     courses: []
 }
 
-const CreateProfile = ({profile = emptyProfile}) => {
+const CreateProfile = ({profile = emptyProfile, prompt}) => {
     let coursesString = ""
     // TODO: Test this
     if (profile !== null) {
         profile.courses.forEach(course => coursesString = coursesString + "," + course);
+        coursesString = coursesString.substring(1, coursesString.length);
     }
 
     const profileContext = useContext(ProfileContext);
+    const alertContext = useContext(AlertContext);
+
+    const { error, clearErrors } = profileContext;
+    const { setAlert } = alertContext;
+
+    useEffect(() => {
+
+        if (error !== null) {
+            setAlert(error, 'danger');
+            clearErrors();
+        }
+
+    }, [error])
 
     const [profileForm, setProfile] = useState({ ...profile, courses: coursesString});
 
@@ -27,13 +42,20 @@ const CreateProfile = ({profile = emptyProfile}) => {
         /* TODO: Add validation for Year & Courses */
         e.preventDefault();
 
-        profileContext.uploadProfile(profileForm);
+        profileContext.uploadProfile({
+            ...profileForm,
+            year: year.toString()
+        });
+
+
     }
 
     return (
         <Fragment>
-            <div className="editprofile-form">
+            <div className="card-md">
+                <h2> {prompt} </h2>
                 <form onSubmit={onSubmit}>
+                    <h2 className="small mt-1"> Your profile picture is loaded from your email-based gravatar </h2>
                     <label htmlFor="bio"> Bio </label>
                     <input type="text" name="bio" id="bio" placeholder="Bio" className="input" value={bio} onChange={onChange} />
                     <label htmlFor="year"> Graduating Year </label>

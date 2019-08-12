@@ -1,6 +1,7 @@
 import { LOGOUT, CLEAR_ERRORS, INITIATE_EDITING, PROFILE_NOT_EXISTS, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED } from '../types';
 
 export default (state, action) => {
+    console.log(action);
     switch(action.type) {
         case PROFILE_USER_LOADED:
             return {

@@ -28,7 +28,7 @@ form{
     justify-content: space-evenly;
 }
 form a:last-of-type:hover{
-    color: #1E7A93;}
+    /*color: #1E7A93;*/}
 .register-btn{
     margin-top: 24px;
 }
@@ -64,7 +64,7 @@ form a:last-of-type:hover{
 .form-title {
     font-size: 36px;
     margin-bottom: 1rem;
-    color: #AA0A1E;
+    color: #A16AE8;
 }
 
 
