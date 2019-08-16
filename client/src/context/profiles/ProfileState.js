@@ -10,7 +10,6 @@ const ProfileState = props => {
         profile_exists: false,
         editing_profile: false,
         user_profile: null,
-        profiles: [],
         loading: true,
         error: null
     }
@@ -31,7 +30,7 @@ const ProfileState = props => {
 
             dispatch({
                 type: PROFILE_NOT_EXISTS,
-                payload: err.response.data.msg
+                payload: null
             })
 
         }
@@ -55,12 +54,13 @@ const ProfileState = props => {
 
             loadProfile();
         } catch (err) {
-            if (state.profile !== null) {
+            if (state.user_profile !== null) {
                 return dispatch({
                     type: PROFILE_USER_FAIL,
                     payload: err.response.data.msg
                 })
             }
+
             dispatch({
                 type: PROFILE_NOT_EXISTS,
                 payload: err.response.data.msg
@@ -74,8 +74,6 @@ const ProfileState = props => {
             type: INITIATE_EDITING
         });
     }
-
-    // Load Peers by Courses
 
     // Logout
     const logout = () => {
@@ -96,6 +94,7 @@ const ProfileState = props => {
             user_profile: state.user_profile,
             profiles: state.profiles,
             loading: state.loading,
+            peers_loaded: state.peers_loaded,
             error: state.error,
             loadProfile,
             uploadProfile,

@@ -40,25 +40,7 @@ router.get('/me', auth, async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('courses', 'Courses are required').not().isEmpty(),
-    check('year', 'A year is required').not().isEmpty(),
-    check('courses', 'Invalid course code').custom(value => {
-        return () => {
-            let courses = value.split(',').map(token => token.trim());
-            let count = 0;
-            courses.forEach(course => {
-                for (var i = 0; i < course.length; i++) {
-                    if (!(course.charAt(i) >= '0' && course.charAt(i) <= '9') && course.charAt(i) === course.charAt(i).toLowerCase()) {
-                        return Promise.reject('Course codes must have uppercase letters');
-                    }
-                    if (course.charAt(i) === " ") {
-                        return Promise.reject('Invalid course code (Coursecodes are one word)');
-                    }
-                    count += 1;
-                    course.log(count);
-                }
-            })
-        };
-    })
+    check('year', 'A year is required').not().isEmpty()
 ]], async (req, res) => {
 
     const errors = validationResult(req);
@@ -67,6 +49,7 @@ router.post('/', [auth, [
     }
 
     const { bio, courses, year } = req.body;
+    let bad = false;
 
     const profileFields = {};
     profileFields.user = req.user.id;
@@ -78,27 +61,73 @@ router.post('/', [auth, [
         }
         for (var i = 0; i < year.length; i++) {
             if (!(year.charAt(i) >= '0' && year.charAt(i) <= '9')) {
-                return res.status(400).json({ msg: 'Invalid year' });
+                res.status(400).json({ msg: 'Invalid year' });
+                bad = true;
             }
         }
         profileFields.year = year;
     }
 
+    if (bad) { 
+        return;
+    }
+
+    let containsLetter = false
+
     if (courses) {
         courses.split(',').map(token => token.trim()).forEach(course => {
-            if (course === "") {
-                return res.status(400).json({ msg: 'Only include course entries'});
-            }
-            for (var i = 0; i < course.length; i++) {
-                if (!(course.charAt(i) >= '0' && course.charAt(i) <= '9') && course.charAt(i) === course.charAt(i).toLowerCase()) {
-                    return res.status(400).json({ msg: 'No lowercase letters & no spaces' });
+            containsLetter = false;
+            if (!bad) {
+                if (course === "" || course === " ") {
+                    res.status(400).json({ msg: 'You\'ve included an empty course entry' });
+                    bad = true;
+                    return;
+                }
+
+                for (var i = 0; i < course.length; i++) {
+                    if (!bad && !(course.charAt(i) >= '0' && course.charAt(i) <= '9') && course.charAt(i) === course.charAt(i).toLowerCase()) {
+                        res.status(400).json({ msg: 'No lowercase letters & spaces' });
+                        bad = true;
+                        return;
+                    } 
+                    if (!containsLetter && !(course.charAt(i) >= '0' && course.charAt(i) <= '9')) {
+                        containsLetter = true;
+                    }
+                    if (!bad && !containsLetter && (course.charAt(i) >= '0' && course.charAt(i) <= '9')) {
+                        res.status(400).json({ msg: 'Invalid course entry' });
+                        bad = true;
+                        return;
+                    }
                 }
             }
+            
         });
+
+        if (bad) {
+            return;
+        }
+
+        if (!containsLetter) {
+            return res.status(400).json({ msg: 'Invalid course entry' });
+        }
+
+        /* see if they included the same course twice */
+        let memo = [];
+        courses.split(',').map(token => token.trim()).forEach(course => {
+            if (memo.includes(course)) {
+                bad = true;
+                return res.status(400).json({ msg:'Same course found multiple times' });
+            }
+            memo.push(course);
+        });
+
+        if (bad) {
+            return;
+        }
 
         profileFields.courses = courses.split(',').map(course => course.trim());
     }
-
+    
     try {
         let profile = await Profile.findOne({ user: req.user.id });
 
@@ -204,6 +233,30 @@ router.get('/groupsAsHost', auth, async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
+    }
+});
+
+
+// @route  GET api/profile/byCourse/:courses
+// @desc   Get all profiles by the user's courses
+// @access Private
+// @note   Implement pagination using (skip & limit aggregators) if ever becomes popular
+router.get('/byCourse/:courses', auth, async (req, res) => {
+    try {   
+        let courseArray = req.params.courses.split(',');
+        const profiles = await Profile.find({ courses: { $in: courseArray } }).populate('user', ['name', 'avatar']);
+
+        /* remove the user from the list TODO: Test this*/
+        const removeIndex = profiles.map(prof => prof.user._id.toString()).indexOf(req.user.id);
+        console.log(removeIndex);
+        if (removeIndex > -1) {
+            profiles.splice(removeIndex, 1);
+        }
+
+        res.json(profiles);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
     }
 });
 

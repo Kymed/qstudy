@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 
 import AuthContext from '../../context/auth/authContext';
 import ProfileContext from '../../context/profiles/profileContext';
+import PeersContext from '../../context/peers/peersContext';
 
 
 const Navbar = props => {
     const authContext = useContext(AuthContext);
     const profileContext = useContext(ProfileContext);
+    const peersContext = useContext(PeersContext);
 
     const { isAuthenticated, logout } = authContext;
     
@@ -16,6 +18,7 @@ const Navbar = props => {
     const onLogout = () => {
         logout();
         profileContext.logout();
+        peersContext.logout();
     }
 
     const authLinks = (

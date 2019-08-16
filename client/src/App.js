@@ -15,6 +15,7 @@ import Peers from './components/peers/Peers';
 import AuthState from './context/auth/AuthState';
 import AlertState from './context/alert/AlertState';
 import ProfileState from './context/profiles/ProfileState';
+import PeersState from './context/peers/PeersState';
 import setAuthToken from './utils/setAuthToken';
 
 if (localStorage.token) {
@@ -26,7 +27,9 @@ const GlobalState = (props) => {
     <AuthState>
       <AlertState>
         <ProfileState>
-          {props.children}
+          <PeersState>
+            {props.children}
+          </PeersState>
         </ProfileState>
       </AlertState>
     </AuthState>

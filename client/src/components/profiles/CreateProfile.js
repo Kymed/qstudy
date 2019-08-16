@@ -30,7 +30,7 @@ const CreateProfile = ({profile = emptyProfile, prompt}) => {
             clearErrors();
         }
 
-    }, [error])
+    }, [error, clearErrors])
 
     const [profileForm, setProfile] = useState({ ...profile, courses: coursesString});
 

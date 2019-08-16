@@ -45,6 +45,7 @@ export default (state, action) => {
                 user_profile: null,
                 profiles: [],
                 loading: true,
+                peers_loaded: false,
                 error: null
             }
 
