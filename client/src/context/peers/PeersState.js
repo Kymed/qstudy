@@ -3,7 +3,7 @@ import axios from 'axios';
 import PeersContext from './peersContext';
 import peersReducer from './peersReducer';
 
-import {PEERS_LOADED, PEERS_CLEAR_SEARCH, PEERS_CLEAR_FILTER, PEERS_FAIL, PEERS_FILTER_SEARCH, PEERS_FILTER_COURSE, PEERS_SET_CURRENT, CLEAR_ERRORS, LOGOUT } from '../types';
+import {PEERS_LOADED, PEERS_FILTER_CURRENT, PEERS_CLEAR_SEARCH, PEERS_CLEAR_FILTER, PEERS_FAIL, PEERS_FILTER_SEARCH, PEERS_FILTER_COURSE, PEERS_SET_CURRENT, CLEAR_ERRORS, LOGOUT } from '../types';
 import peerContext from './peersContext';
 
 const PeersState = props => {
@@ -86,6 +86,11 @@ const PeersState = props => {
     // Filter by course
     const filterByCourse = course => {
         let filtered = state.peers.filter(peer => peer.courses.includes(course));
+
+        filtered = filtered.map(peer => ({
+            ...peer,
+            view: 'normal'
+        }));
 
         dispatch({
             type: PEERS_FILTER_COURSE,

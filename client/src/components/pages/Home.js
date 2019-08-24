@@ -6,6 +6,8 @@ import ProfileContext from '../../context/profiles/profileContext';
 
 import ProfileView from '../profiles/ProfileView';
 import CreateProfile from '../profiles/CreateProfile';
+import BuddyRequests from '../profiles/BuddyRequests';
+import BuddyList from '../profiles/BuddyList';
 
 const Home = (props) => {
     const authContext = useContext(AuthContext);
@@ -13,8 +15,9 @@ const Home = (props) => {
 
     const { user, loading } = authContext;
     const { profile_exists, user_profile, editing_profile} = profileContext;
-
     const profileLoading = profileContext.loading;
+
+    const [refreshBuddies, setRefreshBuddies] = useState(false);
 
     useEffect(() => {
         authContext.loadUser();
@@ -29,13 +32,17 @@ const Home = (props) => {
         !profile_exists ?
             <CreateProfile prompt="Looks like you don't have a profile yet. Let's create one!" />
         :       
-            <Fragment>
+            <div className="dashboard-col">
                 {editing_profile ?
                     <CreateProfile prompt="Edit Your Profile" profile={user_profile} />
                 :
                     <ProfileView profile={user_profile} />
                 }
-            </Fragment>
+                <div className="dashboard-buddies">
+                    <BuddyRequests setRefreshBuddies={setRefreshBuddies} />
+                    <BuddyList refreshBuddies={refreshBuddies} setRefreshBuddies={setRefreshBuddies} />
+                </div>
+            </div>
     }  
             </section>
     )

@@ -11,18 +11,13 @@ const Peers = props => {
     const profileContext = useContext(ProfileContext);
     const peersContext = useContext(PeersContext);
 
-    const { user_profile, profile_exists } = profileContext;
+    const { user_profile, profile_exists, clear } = profileContext;
     const { peers, peers_loaded, clearFilter, killFilter, filterByCourse, filtered, changeView, loading, error } = peersContext;
 
     useEffect(() => {
         if (profile_exists) {
             peersContext.loadPeers(user_profile.courses);
         }
-
-        if (error !== null) {
-            peersContext.clearErrors();
-        }
-
     }, []);
 
     const openLargeView = (id) => {

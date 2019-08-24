@@ -3,7 +3,7 @@ import axios from 'axios';
 import ProfileContext from './profileContext';
 import profileReducer from './profileReducer';
 
-import { CLEAR_ERRORS, INITIATE_EDITING, LOGOUT, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED, PROFILE_NOT_EXISTS } from '../types';
+import { BUDDY_REQUEST_SENT, CLEAR_PROMPTS, CLEAR_ERRORS, INITIATE_EDITING, LOGOUT, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED, PROFILE_NOT_EXISTS } from '../types';
 
 const ProfileState = props => {
     const initialState = {
@@ -11,6 +11,7 @@ const ProfileState = props => {
         editing_profile: false,
         user_profile: null,
         loading: true,
+        prompt: null,
         error: null
     }
 
@@ -67,6 +68,25 @@ const ProfileState = props => {
             })
         }
     }
+
+    // Send a friend request
+    const sendBuddyRequest = async (profile_id) => {
+        try {
+            const res = await axios.put(`api/profile/request/${profile_id}`);
+
+            dispatch({
+                type: BUDDY_REQUEST_SENT,
+                payload: res.data.msg
+            });
+
+            loadProfile();
+        } catch (err) {
+            dispatch({
+                type: PROFILE_ERROR,
+                payload: err.response.data.msg
+            })
+        }
+    }
     
     // Edit Profile
     const initiateEditing = () => {
@@ -80,6 +100,13 @@ const ProfileState = props => {
         dispatch({
             type: LOGOUT
         });
+    }
+
+    // Clear prompts
+    const clearPrompt = () => {
+        dispatch({
+            type: CLEAR_PROMPTS
+        })
     }
 
     // Clear Errors
@@ -96,10 +123,13 @@ const ProfileState = props => {
             loading: state.loading,
             peers_loaded: state.peers_loaded,
             error: state.error,
+            prompt: state.prompt,
             loadProfile,
             uploadProfile,
+            sendBuddyRequest,
             initiateEditing,
             logout,
+            clearPrompt,
             clearErrors
         }}>
             {props.children}

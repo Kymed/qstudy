@@ -1,4 +1,4 @@
-import {PEERS_CLEAR_SEARCH, PEERS_LOADED, PEERS_CLEAR_FILTER, PEERS_FAIL, PEERS_CHANGE_VIEW, PEERS_FILTER_SEARCH, PEERS_FILTER_COURSE, PEERS_SET_CURRENT, CLEAR_ERRORS, LOGOUT } from '../types';
+import {PEERS_CLEAR_SEARCH, PEERS_FILTER_CURRENT, PEERS_LOADED, PEERS_CLEAR_FILTER, PEERS_FAIL, PEERS_CHANGE_VIEW, PEERS_FILTER_SEARCH, PEERS_FILTER_COURSE, PEERS_SET_CURRENT, CLEAR_ERRORS, LOGOUT } from '../types';
 
 export default (state, action) => {
     console.log(action);
@@ -32,6 +32,8 @@ export default (state, action) => {
                 filtered: state.peers.filter(peer => {
                     const regex = new RegExp(`${action.payload}`, 'gi');
                     return peer.user.name.match(regex);
+                }).map(peer => {
+                    return {...peer, view: 'normal'}
                 })
             }
 

@@ -1,4 +1,4 @@
-import { LOGOUT, CLEAR_ERRORS, INITIATE_EDITING, PROFILE_NOT_EXISTS, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED } from '../types';
+import { BUDDY_REQUEST_SENT, CLEAR_PROMPTS, LOGOUT, CLEAR_ERRORS, INITIATE_EDITING, PROFILE_NOT_EXISTS, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED } from '../types';
 
 export default (state, action) => {
     console.log(action);
@@ -38,6 +38,12 @@ export default (state, action) => {
                 error: action.payload
             }
 
+        case BUDDY_REQUEST_SENT:
+            return {
+                ...state,
+                prompt: action.payload
+            }
+
         case LOGOUT:
             return {
                 profile_exists: false,
@@ -46,7 +52,20 @@ export default (state, action) => {
                 profiles: [],
                 loading: true,
                 peers_loaded: false,
-                error: null
+                error: null,
+                prompt: null
+            }
+        
+        case PROFILE_ERROR:
+            return {
+                ...state,
+                error: action.payload
+            }
+        
+        case CLEAR_PROMPTS:
+            return {
+                ...state,
+                prompt: null
             }
 
         case CLEAR_ERRORS:
@@ -54,7 +73,6 @@ export default (state, action) => {
                 ...state,
                 error: null
             }
-        
 
         default:
             return state;

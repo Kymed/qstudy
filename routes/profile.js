@@ -22,7 +22,7 @@ router.get('/me', auth, async (req, res) => {
     try {
         const profile = await Profile.findOne({ user: req.user.id })
                                 .populate('user',
-                                ['name', 'avatar']);
+                                ['_id', 'name', 'avatar']);
         
         if(!profile) {
             return res.status(400).json({ msg: 'Profile does not exist'});
@@ -167,6 +167,23 @@ router.get('/', async (req, res) => {
     }
 })
 
+// @route  GET api/profile/byid/:id
+// @desc   Get a profile by id
+// @access Public
+router.get('/byid/:id', async (req, res) => {
+    try {
+        const profile = await Profile.findById(req.params.id).populate('user', ['name', 'avatar']);
+
+        res.json(profile);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(400).json({ msg: 'Profile not found'});
+        }
+        res.status(500).send('Server error');
+    }
+});
+
 // @route  GET api/profile/user/:user_id
 // @desc   Get profile by user id
 // @access Public
@@ -244,7 +261,7 @@ router.get('/groupsAsHost', auth, async (req, res) => {
 router.get('/byCourse/:courses', auth, async (req, res) => {
     try {   
         let courseArray = req.params.courses.split(',');
-        const profiles = await Profile.find({ courses: { $in: courseArray } }).populate('user', ['name', 'avatar']);
+        const profiles = await Profile.find({ courses: { $in: courseArray } }).populate('user', ['_id', 'name', 'avatar']);
 
         /* remove the user from the list TODO: Test this*/
         const removeIndex = profiles.map(prof => prof.user._id.toString()).indexOf(req.user.id);
@@ -480,6 +497,45 @@ router.delete('/buddy/:buddy_id', auth, async (req, res) => {
         res.status(500).send('Server error');
     }
 })
+
+// @route  GET api/profile/buddyRequests
+// @desc   Get the profiles of a user's buddy requests
+// @access Private
+router.get('/buddyRequests', auth, async(req, res) => {
+    try {
+        // Get the user's profile and check if it exists  
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
+
+        const profiles = await Profile.find({ user: { $in: profile.requests } }).populate('user', ['name', 'avatar']);
+        res.json(profiles);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route  GET api/profile/buddyProfiles
+// @desc   Get the profiles of a user's buddy buddies
+// @access Private
+router.get('/buddyProfiles', auth, async(req, res) => {
+    try {
+        // Get the user's profile and check if it exists  
+        const profile = await Profile.findOne({ user: req.user.id });
+        if (!profile) {
+            return res.status(401).json({ msg: 'You did not make your profile yet' });
+        }
+
+        const profiles = await Profile.find({ user: { $in: profile.buddies } }).populate('user', ['name', 'avatar']);
+        res.json(profiles);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 
 // @route  GET api/profile/invites
 // @desc   Get all group invites

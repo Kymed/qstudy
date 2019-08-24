@@ -1,5 +1,6 @@
 import React, { Fragment, useContext } from 'react';
 
+import PeerRequestButton from './PeerRequestButton';
 
 const ViewPeer = ({ profile, closeLargeView }) => {
     const { _id, user, bio, year, courses } = profile;
@@ -25,7 +26,7 @@ const ViewPeer = ({ profile, closeLargeView }) => {
 
                     <div className="profile-button-group">
                         <button onClick={() => closeLargeView(_id)} className="btn-small"> Close </button>
-                        <button className="btn-small"> Send Buddy Request </button>
+                        <PeerRequestButton peerid={_id} useThisPeerInstead={profile} />
                     </div>
                 </div>
             </div>

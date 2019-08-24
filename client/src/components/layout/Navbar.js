@@ -12,6 +12,7 @@ const Navbar = props => {
     const peersContext = useContext(PeersContext);
 
     const { isAuthenticated, logout } = authContext;
+    const { profile_exists } = profileContext;
     
     let navName = "text-center nav-item"
 
@@ -23,7 +24,9 @@ const Navbar = props => {
 
     const authLinks = (
         <Fragment>
+            {profile_exists && 
             <Link to="/peers" className={navName}> Peers </Link>
+            }
             <Link to="/home" className={navName}> Dashboard </Link>
             <a onClick={onLogout} href="#!" className={navName}> Logout </a>
         </Fragment>
