@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react'
 
 import ProfileContext from '../../context/profiles/profileContext';
-import AlertContext from '../../context/alert/alertContext';
 
 let emptyProfile = {
     bio: "",
@@ -18,19 +17,7 @@ const CreateProfile = ({profile = emptyProfile, prompt}) => {
     }
 
     const profileContext = useContext(ProfileContext);
-    const alertContext = useContext(AlertContext);
-
-    const { error, clearErrors } = profileContext;
-    const { setAlert } = alertContext;
-
-    useEffect(() => {
-
-        if (error !== null) {
-            setAlert(error, 'danger');
-            clearErrors();
-        }
-
-    }, [error, clearErrors])
+    const { uploadProfile } = profileContext;
 
     const [profileForm, setProfile] = useState({ ...profile, courses: coursesString});
 
@@ -39,14 +26,12 @@ const CreateProfile = ({profile = emptyProfile, prompt}) => {
     const onChange = e => setProfile({...profileForm, [e.target.name]: e.target.value});
     
     const onSubmit = e => {
-        /* TODO: Add validation for Year & Courses */
         e.preventDefault();
 
-        profileContext.uploadProfile({
+        uploadProfile({
             ...profileForm,
             year: year.toString()
         });
-
 
     }
 

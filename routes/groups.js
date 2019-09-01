@@ -109,9 +109,9 @@ router.post('/', [auth, [
 // @route  GET api/groups
 // @desc   Get all groups
 // @access Private
-router.get('/', auth, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const groups = await Group.find().sort({ date: -1 });
+        const groups = await Group.find().sort({ date_created: -1 });
         res.json(groups);
 
     } catch (err) {

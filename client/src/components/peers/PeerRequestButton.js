@@ -1,4 +1,5 @@
 import React, {Fragment, useState, useEffect, useContext} from 'react';
+import PropTypes from 'prop-types';
 
 import ProfileContext from '../../context/profiles/profileContext';
 import PeerContext from '../../context/peers/peersContext';
@@ -17,8 +18,8 @@ const PeerRequestButton = ({ peerid, useThisPeerInstead = null}) => {
         disabled: true
     });
 
-    const { user_profile, sendBuddyRequest } = profileContext;
-    const { peers } = peerContext;
+    const { user_profile, sendBuddyRequest, loadProfile } = profileContext;
+    const { peers, loadPeers } = peerContext;
 
     const fetchPeer = () => {
         // Fetch the peer depending if one was passed in as prop
@@ -62,7 +63,7 @@ const PeerRequestButton = ({ peerid, useThisPeerInstead = null}) => {
         }
 
         // Check if you have sent a request
-        exists = requests.filter(request => request === user_profile.user._id);
+        exists = requests.filter(request => request === user_profile.user. _id);
         if (exists.length > 0) {
             return setBtn({
                 text: 'Buddy request sent',
@@ -82,9 +83,12 @@ const PeerRequestButton = ({ peerid, useThisPeerInstead = null}) => {
 
     }, [peers]);
 
-    const onClick = () => {
+    const onClick = async () => {
         if (!btn.disabled) {
             sendBuddyRequest(peerid);
+            await loadProfile();
+            await loadPeers(user_profile.courses);
+            findRequestState();
         }
     }
 

@@ -4,28 +4,36 @@ import { Link } from 'react-router-dom';
 import AuthContext from '../../context/auth/authContext';
 import ProfileContext from '../../context/profiles/profileContext';
 import PeersContext from '../../context/peers/peersContext';
-
+import GroupsContext from '../../context/groups/groupsContext';
 
 const Navbar = props => {
     const authContext = useContext(AuthContext);
     const profileContext = useContext(ProfileContext);
     const peersContext = useContext(PeersContext);
+    const groupsContext = useContext(GroupsContext);
 
-    const { isAuthenticated, logout } = authContext;
+    const { isAuthenticated } = authContext;
     const { profile_exists } = profileContext;
     
     let navName = "text-center nav-item"
 
     const onLogout = () => {
-        logout();
+        authContext.logout();
         profileContext.logout();
         peersContext.logout();
+        groupsContext.logout();
     }
 
     const authLinks = (
         <Fragment>
-            {profile_exists && 
-            <Link to="/peers" className={navName}> Peers </Link>
+
+            {profile_exists &&
+            (<Fragment>
+                <Link to="/newgroup" className={navName}>Create</Link>
+                <Link to="/groups" className={navName}>Groups</Link>
+                <Link to="/peers" className={navName}> Peers </Link>
+                {/*<Link to="/newgroup" className={navName}> NewGroup </Link>*/}
+            </Fragment>)
             }
             <Link to="/home" className={navName}> Dashboard </Link>
             <a onClick={onLogout} href="#!" className={navName}> Logout </a>

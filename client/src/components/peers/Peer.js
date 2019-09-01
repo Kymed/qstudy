@@ -6,7 +6,7 @@ const Peer = ({ profile, openLargeView }) => {
     const { avatar } = user;
 
     return (<Fragment>
-        <div className="card-row peer-margin">
+        <div className="peer-card-small peer-margin">
             <div className="profile-header">
                 <h1 className="peer-text row-title"> {user.name} </h1>
                 <p className="peer-text peer-small"> {year} </p>

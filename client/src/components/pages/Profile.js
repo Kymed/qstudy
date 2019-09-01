@@ -2,6 +2,8 @@ import React, { Fragment, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
+import PeerRequestButton from '../peers/PeerRequestButton';
+
 import AlertContext from '../../context/alert/alertContext';
 
 const Profile = ({ match, location }) => {
@@ -44,7 +46,7 @@ const Profile = ({ match, location }) => {
 
     }, []);
 
-    const { user, bio, year } = profileState.profile;
+    const { _id, user, bio, year } = profileState.profile;
 
     return (
         <Fragment>
@@ -68,7 +70,7 @@ const Profile = ({ match, location }) => {
                                     <ul className="course-list"> {courseElements} </ul>
 
                                     <div className="profile-button-group">
-                                        <button className="btn-small"> Send friend request </button>
+                                        <PeerRequestButton peerid={_id} useThisPeerInstead={profileState.profile} />
                                     </div>
                                 </div>
                             </div>

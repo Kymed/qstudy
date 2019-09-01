@@ -40,12 +40,16 @@ router.get('/me', auth, async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('courses', 'Courses are required').not().isEmpty(),
-    check('year', 'A year is required').not().isEmpty()
+    check('year', 'A year is required').not().isEmpty(),
+    check('bio', 'Exceeded character limit of 300').custom(value => 
+            value.length <= 300
+        )
 ]], async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        errorMsgs = errors.array().map(err => err.msg);
+        return res.status(400).json({ msg: errorMsgs });
     }
 
     const { bio, courses, year } = req.body;

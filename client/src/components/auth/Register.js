@@ -58,7 +58,6 @@ const Register = props => {
             <div className="container text-center">
                 <div className="sign-in-form card-lg">
                     <h1 className="text-center form-title"> Sign up</h1>
-                    <h2> {alert} </h2>
                         <form onSubmit={onSubmit}>
                             <label htmlFor="name">Name</label>
                             <input type="text" name="name" id="name" placeholder="Name" className="input" value={name} onChange={onChange}/>
