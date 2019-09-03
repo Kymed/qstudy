@@ -2,7 +2,7 @@
 
 QStudy is a web app for Kingston students (Queens intended) to host and join study groups. 
 
-A **Full-Stack Software System** interfaced as a Single page web application built with **ES5/6/7+ Javascript and React.js**. Which interfaces a **REST APi** built with **Node.js, Express, and MongoDB** (Mongoose). The user experience is interactive and dynamic, through appropriate advantage of SPA-logic to give a native-like experience. 
+A **Full-Stack Software System** consisting of a Single Page Web Application built with **ES5/6/7+ Javascript and React.js**. Which interfaces a **REST APi** built with **Node.js, Express, and MongoDB** (Mongoose). The user experience is interactive and dynamic, through appropriate advantage of SPA-logic to give a native-like experience. 
 
 *Not enough time to read the pitch?*
 
@@ -61,11 +61,13 @@ My first side project of significant scale. My 2d game had 5000 lines and maybe 
 * Delete Accounts
 * Anti-spam end point protection
 * Probably make the CSS look a little better lol
+* Learn Containerization & AWS and Deploy!
+* Responsive Notifications Drop down and Notifications Page for seeing past notifications and deletions
 
 ### Could of done better, and possibly fix in the future
 
 * Utilize props and higher-order components for component reusability
-* Better project planning and architecture design
+* First React project so I took it straight on, step at a time. I had a plan, but didn't know React well enough to be super in-depth. Next time,better project planning and architecture design would save time and allow for more code reusability
 * Better APi/db design although mine didn't cause much problems
 * Make more middleware and promise returning utility functions for APi logic reusability
 * Use of CSS Grid for layout management and layout-skeleton loading screens

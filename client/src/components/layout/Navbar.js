@@ -29,7 +29,12 @@ const Navbar = props => {
 
             {profile_exists &&
             (<Fragment>
-                <Link to="/newgroup" className={navName}>Create</Link>
+                <Link to={{
+                        pathname: `/newgroup`,
+                        state: {
+                            goBack: `/home`
+                        }
+                }} className={navName}>Create</Link>
                 <Link to="/groups" className={navName}>Groups</Link>
                 <Link to="/peers" className={navName}> Peers </Link>
                 {/*<Link to="/newgroup" className={navName}> NewGroup </Link>*/}
@@ -50,7 +55,9 @@ const Navbar = props => {
 
     return (
         <div className="navbar">
-            <h1 className="navbar-brand">QStudy</h1>
+            <Link to="/home">
+                <h1 className="navbar-brand">QStudy</h1>
+            </Link>
             <div className="menu navs">
                 {isAuthenticated ? authLinks : guestLinks}
             </div>

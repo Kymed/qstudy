@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import ProfileContext from '../../context/profiles/profileContext';
 
@@ -33,6 +34,14 @@ const ProfileView = ( {profile} ) => {
             </div>
 
             <button className="btn-dash" onClick={editProfile}> Edit Profile </button>
+            <Link to={{
+                pathname: "/newgroup",
+                state: {
+                    goBack: "/home"
+                }
+            }}>
+                <button className="btn-dash btn-create">Create Group</button>
+            </Link>
         </div>
     )
 }

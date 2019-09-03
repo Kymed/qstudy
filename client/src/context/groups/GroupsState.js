@@ -3,12 +3,13 @@ import axios from 'axios';
 import GroupsContext from './groupsContext';
 import groupsReducer from './groupsReducer';
 
-import { CREATE_GROUP, GROUP_CREATE_FAIL, CLEAR_ERRORS, LOGOUT, GROUPS_LOADED, GROUPS_FAIL, GROUPS_CLEAR_SEARCH, GROUPS_CLEAR_FILTER, GROUPS_FILTER_SEARCH, GROUPS_FILTER_COURSE, GROUPS_FILTER_CURRENT, GROUPS_SET_CURRENT } from '../types';
+import { CREATE_GROUP, GROUP_CREATE_FAIL, CLEAR_ERRORS, LOGOUT, GROUPS_LOADED, GROUPS_FAIL, GROUPS_CLEAR_SEARCH, GROUPS_CLEAR_FILTER, GROUPS_FILTER_SEARCH, GROUPS_FILTER_COURSE, GROUPS_FILTER_CURRENT, GROUPS_SET_CURRENT, CLEAR_SUCCESS } from '../types';
 
 const GroupsState = props => {
     const initialState = {
         current: null,
         creation_error: null,
+        creation_success: false,
         groups_loaded: false,
         groups: [],
         filtered: [],
@@ -104,6 +105,13 @@ const GroupsState = props => {
             view: 'normal'
         }));
 
+        if (filtered.length === 0) {
+            return dispatch({
+                type: GROUPS_FAIL,
+                payload: "No groups found"
+            })
+        }
+
         dispatch({
             type: GROUPS_FILTER_COURSE,
             payload: filtered
@@ -146,10 +154,18 @@ const GroupsState = props => {
         })
     }
 
+    // Clear Success
+    const clearSuccess = () => {
+        dispatch({
+            type: CLEAR_SUCCESS
+        })
+    }
+
     return (
         <GroupsContext.Provider value={{
             current: state.current,
             creation_error: state.creation_error,
+            creation_success: state.creation_success,
             groups: state.groups,
             filtered: state.filtered,
             cancel_search: state.cancel_search,
@@ -163,6 +179,7 @@ const GroupsState = props => {
             killFilter,
             clearFilter,
             clearErrors,
+            clearSuccess,
             logout
         }}>
             {props.children}

@@ -884,4 +884,16 @@
 .to-right {
   margin-left: auto;
 }
+
+.btn-create {
+  border: 1px solid #0F8BE1;
+  background-color: #0F8BE1;
+  color: #fff;
+}
+
+.btn-create:hover {
+  border: 1px solid #0F8BE1;
+  background-color: #fff;
+  color: #0F8BE1;
+}
 /* explore groups */

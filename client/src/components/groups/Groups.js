@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, Fragment } from 'react';
+import { Link } from 'react-router-dom';
 
 import Group from './Group';
 import ViewGroup from './ViewGroup';
@@ -71,6 +72,16 @@ const Groups = () => {
                     {user_profile.courses.map((course, index) => (
                         <button key={index} onClick={() => filterButtonClick(course)} className="btn-med btn-peer">{course}</button>
                     ))}
+                    <div className="to-right">
+                        <Link to={{
+                            pathname: `/newgroup`,
+                            state: {
+                                goBack: `/groups`
+                            }
+                        }}>
+                            <button className="btn-med btn-create">Create Group</button>
+                        </Link>
+                    </div>
                 </div>
                 <div className="group-cards">
                     {groups.length === 0 ? 
@@ -80,20 +91,8 @@ const Groups = () => {
                     :
                     (<Fragment>
                         {filtered.length === 0 ? 
-                            (<Fragment>
-                                {groups.map((group, index) => {
-                                if (index > 20) return;
-                                if (isHost(group)) return;
-                                if (group.view === "normal") {
-                                    return <Group key={group._id} group={group} openLargeView={openLargeView} />
-                                } else {
-                                    return <ViewGroup key={group._id} group={group} closeLargeView={closeLargeView} />
-                                }
-                                })}
-                            </Fragment>)
-                            :
-                            (<Fragment>
-                            {filtered.map((group, index) => {
+                        (<Fragment>
+                            {groups.map((group, index) => {
                                 if (index > 20) return;
                                 if (isHost(group)) return;
                                 if (group.view === "normal") {
@@ -102,7 +101,19 @@ const Groups = () => {
                                     return <ViewGroup key={group._id} group={group} closeLargeView={closeLargeView} />
                                 }
                             })}
-                            </Fragment>)
+                        </Fragment>)
+                        :
+                        (<Fragment>
+                        {filtered.map((group, index) => {
+                            if (index > 20) return;
+                            if (isHost(group)) return;
+                            if (group.view === "normal") {
+                                return <Group key={group._id} group={group} openLargeView={openLargeView} />
+                            } else {
+                                return <ViewGroup key={group._id} group={group} closeLargeView={closeLargeView} />
+                            }
+                        })}
+                        </Fragment>)
                         }
                     </Fragment>)
                     }

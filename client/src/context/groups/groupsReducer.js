@@ -1,4 +1,4 @@
-import { CREATE_GROUP, GROUP_CREATE_FAIL, CLEAR_ERRORS, LOGOUT, GROUPS_LOADED, GROUPS_FAIL, GROUPS_CLEAR_SEARCH, GROUPS_CLEAR_FILTER, GROUPS_FILTER_SEARCH, GROUPS_FILTER_COURSE, GROUPS_FILTER_CURRENT, GROUPS_SET_CURRENT } from '../types';
+import { CREATE_GROUP, CLEAR_SUCCESS, GROUP_CREATE_FAIL, CLEAR_ERRORS, LOGOUT, GROUPS_LOADED, GROUPS_FAIL, GROUPS_CLEAR_SEARCH, GROUPS_CLEAR_FILTER, GROUPS_FILTER_SEARCH, GROUPS_FILTER_COURSE, GROUPS_FILTER_CURRENT, GROUPS_SET_CURRENT } from '../types';
 
 export default (state, action) => {
     console.log(action);
@@ -8,6 +8,7 @@ export default (state, action) => {
             return {
                 ...state,
                 current: action.payload,
+                creation_success: true,
                 creation_error: null
             }
 
@@ -60,6 +61,12 @@ export default (state, action) => {
             return {
                 ...state,
                 error: action.payload
+            }
+
+        case CLEAR_SUCCESS:
+            return {
+                ...state,
+                creation_success: false
             }
 
         case CLEAR_ERRORS:

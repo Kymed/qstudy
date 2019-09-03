@@ -49,13 +49,22 @@ const pushNotification = require('../utils/notification');
 // @access Private
 router.post('/', [auth, [
     check('name', 'Name is required').not().isEmpty(),
-    check('course', 'A course is required').not().isEmpty()
+    check('course', 'A course is required').not().isEmpty(),
+    check('name', 'Name exceeded character limit of 50').custom(value =>
+        value.length <= 50),
+    check('description', 'Description exceeded character limit of 150').custom(value =>
+        value.length <= 150),
+    check('max_members', 'Exceeded maximum of 500 members').custom(value =>
+        parseInt(value) <= 500),
+    check('max_members', 'Minimum 2 members required').custom(value =>
+        parseInt(value) >= 2)
 ]], async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        errorMsgs = errors.array().map(err => err.msg);
         return res.status(400).json({
-            errors: errors.array()
+            msg: errorMsgs
         });
     }
 

@@ -1,15 +1,16 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
+import { Link } from 'react-router-dom';
 
 import ProfileContext from '../../context/profiles/profileContext';
 import GroupsContext from '../../context/groups/groupsContext';
 import AlertContext from '../../context/alert/alertContext';
 
-const CreateGroup = ({existingGroup = null, history}) => {
+const CreateGroup = ({existingGroup = null, history, location}) => {
     const profileContext = useContext(ProfileContext);
     const groupsContext = useContext(GroupsContext);
     const alertContext = useContext(AlertContext);
     
-    const { uploadGroup, creation_error, clearErrors } = groupsContext;
+    const { uploadGroup, creation_error, creation_success, clearErrors, clearSuccess } = groupsContext;
     const { setAlert } = alertContext;
     const { profile_exists, user_profile } = profileContext;
     
@@ -52,8 +53,14 @@ const CreateGroup = ({existingGroup = null, history}) => {
 
     useEffect(() => {
         if (creation_error !== null) {
-            setAlert(creation_error, 'danger');
+            creation_error.forEach(error => setAlert(error, 'danger'));
             clearErrors();
+        }
+
+        if (creation_success === true) {
+            setAlert('Success', 'success');
+            clearSuccess();
+            history.push('/home');
         }
 
     }, [creation_error]);
@@ -78,8 +85,6 @@ const CreateGroup = ({existingGroup = null, history}) => {
             setAlert('Member limit too small', 'danger');
         } else {
             uploadGroup(group);
-            setAlert('Success', 'success');
-            history.push('/home');
         }
     }
 
@@ -121,6 +126,13 @@ const CreateGroup = ({existingGroup = null, history}) => {
                         </form>
                 </div>
             </div>
+        <Link to={location.state.goBack !== null ?
+                `${location.state.goBack}`
+            :
+                `/home`
+        }>
+            <button className="btn-med btn-peer">Back</button>
+        </Link>
         </div>
     </Fragment>
     )
