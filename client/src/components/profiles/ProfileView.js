@@ -42,6 +42,9 @@ const ProfileView = ( {profile} ) => {
             }}>
                 <button className="btn-dash btn-create">Create Group</button>
             </Link>
+            <Link to='/studyview'>
+                <button className="btn-dash btn-peer">Study</button>
+            </Link>
         </div>
     )
 }

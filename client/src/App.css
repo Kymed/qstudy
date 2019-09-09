@@ -279,6 +279,10 @@
     margin-left: auto;
   }
 
+  .create-profile-margin {
+    margin-bottom: 20px;
+  }
+
     /* some more profile stuff */
 
   /* peers */
@@ -609,7 +613,7 @@
   }
   .navbar input:checked + label ~ .menu-toggle-items{
     display: flex;
-    z-index: 1;
+    z-index: 2;
   }
   
   .menu-toggle-items{
@@ -897,3 +901,169 @@
   color: #0F8BE1;
 }
 /* explore groups */
+
+/* study view */
+.studyview-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.studyview-wrapper-desktop-smaller {
+  width: 77%;
+  margin-left: auto;
+  transition: 3s;
+}
+
+.studyview-cards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.study-card {
+  flex-grow: 2;
+  width: 320px;
+  border: 1px solid #A16AE8;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px; 
+  border-radius: 10px;
+  -webkit-box-shadow: 0 5px 15px hsla(0,0%,0%,.2);
+  -moz-box-shadow: 0 5px 15px hsla(0,0%,0%,.2);
+  box-shadow: 0 5px 15px hsla(0,0%,0%,.2);
+  padding: 15px;
+  margin: 15px;
+  background-color: rgb(244, 242, 239);
+}
+
+.study-card-sm {
+  flex-grow: 1;
+}
+
+.study-card-lg {
+  width: 600px;
+  flex-grow: 4;
+  flex-shrink: 2;
+}
+
+.study-text {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.study-text-profile {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+  text-align: center;
+  text-size-adjust: auto;
+}
+
+.study-header {
+  font-size: 1.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.study-avatar {
+  border-radius: 75%;
+  width: 8%;
+  height: 8%;
+  margin-right: right;
+}
+
+.study-sm {
+  font-size: 0.9rem;
+  color: gray;
+}
+
+.study-btn-profile {
+  box-sizing: content-box;
+  text-align: center;
+  text-decoration: none;
+  margin: 0.3rem;
+  font-size: 0.6rem;
+  padding: 0.15rem 0.60rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.1s;
+  height: 1.5rem;
+}
+
+.study-member {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  margin: 0.8rem;
+  margin-left: auto;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.invite-card {
+  margin-left: 25px;
+  width: 1050px;
+  max-width: 80vw;
+}
+/* study view */
+
+/* study view group selection */
+
+.sidebar {
+  height: 1920px;
+  width: 0;
+  position: absolute;
+  z-index: 1;
+  top: 0px;
+  left: 0;
+  background-color: #EA3160;
+  padding-top: 30px;
+  transition: 0.4s;
+}
+
+.sidebar-link {
+  padding: 6px 6px 22px 25px;
+  text-decoration: none;
+  font-size: 20px;
+  color: #fff;
+  display: block;
+  transition: 0.5s;
+}
+
+.sidebar-link:hover {
+  cursor: pointer;
+  color: gray;
+  transition: 0.3s;
+}
+
+.sidebar-on {
+  width: 350px;
+}
+
+.sidebar-off {
+  width: 0px;
+}
+
+.sidebar .btn-close {
+  position: absolute;
+  top: 15px;
+  right: 30px;
+  margin-left: 60px;
+}
+
+.sidebar .btn-close .btn-close-icon {
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+

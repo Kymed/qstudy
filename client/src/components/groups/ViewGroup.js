@@ -2,6 +2,8 @@ import React, { Fragment, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
+import Join from './Join';
+
 const ViewGroup = ({ group, closeLargeView }) => {
     const { _id, name, description, members, course, max_members } = group;
     const host =  members[0];
@@ -17,7 +19,6 @@ const ViewGroup = ({ group, closeLargeView }) => {
     const getHostProfile = async (id) => {
         try {
             const res = await axios.get(`api/profile/user/${id}`);
-            console.log(res.data)
 
             setHostProfile({
                 loading: false,
@@ -70,7 +71,7 @@ const ViewGroup = ({ group, closeLargeView }) => {
             </div>
             <div className="profile-button-group">
                 <button className="btn-small" onClick={() => closeLargeView(_id)}>Close</button>
-                <button className="btn-small">Join</button>
+                <Join group={group} />
             </div>
         </div>
     )

@@ -1,5 +1,7 @@
 import React, { Fragment } from 'react';
 
+import Join from './Join';
+
 const Group = ({ group, openLargeView }) => {
     const { _id, name, course, members, max_members } = group;
 
@@ -12,7 +14,7 @@ const Group = ({ group, openLargeView }) => {
             </div>
             <div className="profile-button-group">
                     <button className="btn-small" onClick={() => openLargeView(_id)}> More </button>
-                    <button className="btn-small"> Join </button>
+                    <Join group={group} />
             </div>
         </div>
     )

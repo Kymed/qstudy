@@ -5,7 +5,7 @@ import ProfileContext from '../../context/profiles/profileContext';
 import GroupsContext from '../../context/groups/groupsContext';
 import AlertContext from '../../context/alert/alertContext';
 
-const CreateGroup = ({existingGroup = null, history, location}) => {
+const CreateGroup = ({existingGroup, history, location, finish}) => {
     const profileContext = useContext(ProfileContext);
     const groupsContext = useContext(GroupsContext);
     const alertContext = useContext(AlertContext);
@@ -17,36 +17,27 @@ const CreateGroup = ({existingGroup = null, history, location}) => {
     const [courses, setCourses] = useState([]);
 
     const [group, setGroup] = useState({
-        name: "",
-        course: "",
-        description: "",
-        public: false,
-        max_members: 20
+        ...existingGroup,
+        id: existingGroup._id
     });
 
     const {name, course, description, max_members} = group;
 
     useEffect(() => {
-        if (existingGroup !== null) {
-            setGroup({
-                ...group,
-                ...existingGroup
-            })
-        } else {
-            setGroup({
-                ...group
-            })
+        if (group._id) {
+            delete group._id;
         }
-
     }, []);
 
     useEffect(() => {
         if (profile_exists && user_profile.courses.length > 0) {
             setCourses(user_profile.courses);
-            setGroup({
-                ...group,
-                course: user_profile.courses[0]
-            })
+            if (!existingGroup.exists) {
+                setGroup({
+                    ...group,
+                    course: user_profile.courses[0]
+                })
+            }
         }
 
     }, [user_profile]);
@@ -58,12 +49,18 @@ const CreateGroup = ({existingGroup = null, history, location}) => {
         }
 
         if (creation_success === true) {
-            setAlert('Success', 'success');
-            clearSuccess();
-            history.push('/home');
+            if (existingGroup.exists) {
+                setAlert('Group successfully edited', 'success');
+                clearSuccess();
+                finish()
+            } else {
+                setAlert('Group successfully created', 'success');
+                clearSuccess();
+                history.push('/studyview');
+            }
         }
 
-    }, [creation_error]);
+    }, [creation_error, creation_success]);
 
     const onChange = e =>
         setGroup({ 
@@ -93,7 +90,11 @@ const CreateGroup = ({existingGroup = null, history, location}) => {
         <div className="create-group-wrap">
             <div className="container text-center">
                 <div className="create-group-form card-lg">
-                    <h1 className="text-center form-title"> Create Group </h1>
+                    {group.exists ? (
+                        <h1 className="text-center form-title">Edit Group</h1>
+                    ) : (
+                        <h1 className="text-center form-title">Create Group</h1>
+                    )}
                         <form onSubmit={onSubmit}>
                             <label htmlFor="name">Name</label>
                             <input type="text" name="name" id="name" placeholder="Name" className="input" value={name} onChange={onChange} />
@@ -126,16 +127,31 @@ const CreateGroup = ({existingGroup = null, history, location}) => {
                         </form>
                 </div>
             </div>
-        <Link to={location.state.goBack !== null ?
-                `${location.state.goBack}`
-            :
-                `/home`
-        }>
-            <button className="btn-med btn-peer">Back</button>
-        </Link>
+        {!existingGroup.exists &&
+            <Fragment>
+                <Link to={location.state.goBack !== null ?
+                        `${location.state.goBack}`
+                    :
+                        `/home`
+                }>
+                    <button className="btn-med btn-peer">Back</button>
+                </Link>
+            </Fragment>
+        }
         </div>
     </Fragment>
     )
+}
+
+CreateGroup.defaultProps = {
+    existingGroup: {
+        exists: false,
+        name: "",
+        course: "",
+        description: "",
+        public: false,
+        max_members: 20
+    }
 }
 
 export default CreateGroup;

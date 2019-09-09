@@ -2,11 +2,11 @@
 
 QStudy is a web app for Kingston students (Queens intended) to host and join study groups. 
 
-A **Full-Stack Software System** consisting of a Single Page Web Application built with **ES5/6/7+ Javascript and React.js**. Which interfaces a **REST APi** built with **Node.js, Express, and MongoDB** (Mongoose). The user experience is interactive and dynamic, through appropriate advantage of SPA-logic to give a native-like experience. 
+A **Full-Stack Software System** consisting of a Single Page Web Application built with **ES5/6/7+ Javascript and React.js**. Which interfaces a **REST APi** built with **Node.js, Express, and MongoDB** (Mongoose). The site is interactive and dynamic, through appropriate advantage of SPA-logic to give an app-like user experience. 
 
 *Not enough time to read the pitch?*
 
-**TL;DR** Large "Create chatrooms" app with User Authentication, tailored for group studying for UX use-cases, with AirBnB's "Use google maps to find BnBs" but for IRL Study Crams (but that last part not just yet,and will add later).
+**TL;DR** Large mini social media "group messenger" app with User Authentication, tailored for group studying for UX use-cases, with AirBnB's "Use google maps to find BnBs" but for IRL Study Crams (but that last part not just yet,and will add later).
 
 **Lots of APi & component logic, on a large scale app, hopefully demonstrating competent technical ability.**
 
@@ -57,9 +57,7 @@ My first side project of significant scale. My 2d game had 5000 lines and maybe 
 * Create the "Cram System" where you can host real life study group sessions within a "group", placing location and time on Google maps, using Google Maps APi.
 * "Explore by Cram" in the explore page where you can see study groups on a map.
 * Publicize/Privatize Crams (Seperate from group privacy) options.
-* Block Accounts
-* Delete Accounts
-* Anti-spam end point protection
+* Block Accounts and Delete Accounts
 * Probably make the CSS look a little better lol
 * Learn Containerization & AWS and Deploy!
 * Responsive Notifications Drop down and Notifications Page for seeing past notifications and deletions

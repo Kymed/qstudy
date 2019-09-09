@@ -8,6 +8,7 @@ import ProfileView from '../profiles/ProfileView';
 import CreateProfile from '../profiles/CreateProfile';
 import BuddyRequests from '../profiles/BuddyRequests';
 import BuddyList from '../profiles/BuddyList';
+import ProfileInvites from '../profiles/ProfileInvites';
 
 const Home = (props) => {
     const authContext = useContext(AuthContext);
@@ -38,6 +39,7 @@ const Home = (props) => {
                 :
                     <ProfileView profile={user_profile} />
                 }
+                <ProfileInvites />
                 <div className="dashboard-buddies">
                     <BuddyRequests setRefreshBuddies={setRefreshBuddies} />
                     <BuddyList refreshBuddies={refreshBuddies} setRefreshBuddies={setRefreshBuddies} />

@@ -3,7 +3,7 @@ import axios from 'axios';
 import GroupsContext from './groupsContext';
 import groupsReducer from './groupsReducer';
 
-import { CREATE_GROUP, GROUP_CREATE_FAIL, CLEAR_ERRORS, LOGOUT, GROUPS_LOADED, GROUPS_FAIL, GROUPS_CLEAR_SEARCH, GROUPS_CLEAR_FILTER, GROUPS_FILTER_SEARCH, GROUPS_FILTER_COURSE, GROUPS_FILTER_CURRENT, GROUPS_SET_CURRENT, CLEAR_SUCCESS } from '../types';
+import { CREATE_GROUP, GROUP_CREATE_FAIL, CLEAR_ERRORS, LOGOUT, GROUPS_LOADED, GROUPS_FAIL, GROUPS_CLEAR_SEARCH, GROUPS_CLEAR_FILTER, GROUPS_FILTER_SEARCH, GROUPS_FILTER_COURSE, GROUPS_FILTER_CURRENT, GROUPS_SET_CURRENT, CLEAR_SUCCESS, SEND_JOIN_REQUEST, CLEAR_PROMPTS, GROUPS_USER_LOADED } from '../types';
 
 const GroupsState = props => {
     const initialState = {
@@ -11,11 +11,14 @@ const GroupsState = props => {
         creation_error: null,
         creation_success: false,
         groups_loaded: false,
+        user_groups_loading: true,
+        user_groups: [],
         groups: [],
         filtered: [],
         cancel_search: false,
         loading: true,
-        error: null
+        error: null,
+        prompt: null
     }
 
     const [state, dispatch] = useReducer(groupsReducer, initialState);
@@ -118,6 +121,67 @@ const GroupsState = props => {
         })
     }
 
+    // Send a join request
+    const sendJoinRequest = async (groupid) => {
+        try {
+            const res = await axios.put(`api/groups/requests/${groupid}`);
+            console.log(res.data);
+            dispatch({
+                type: SEND_JOIN_REQUEST,
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: GROUPS_FAIL,
+                payload: err.response.data.msg
+            })
+        }
+    }
+
+    // Load a group 
+    const setGroupCurrent = async (id) => {
+        // First check if its loaded in groups
+        /*let filter = state.groups.filter(group => group._id === id)
+        if (filter.length === 1) {
+            return dispatch({
+                type: GROUPS_SET_CURRENT,
+                payload: filter[0]
+            })
+        }*/
+
+        // Make a request to get the group
+        try {
+            const res = await axios.get(`api/groups/${id}`);
+
+            dispatch({
+                type: GROUPS_SET_CURRENT,
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: GROUPS_FAIL,
+                payload: err.response.data.msg
+            })
+        }
+    }
+
+    // Get the users groups
+    const getUserGroups = async () => {
+        try {
+            const res = await axios.get('api/profile/groups');
+
+            dispatch({
+                type: GROUPS_USER_LOADED,
+                payload: res.data
+            });
+        } catch (err) {
+            dispatch({
+                type: GROUPS_FAIL,
+                payload: err.response.data.msg
+            })
+        }
+    }
+
     // Filter by Search
     const filterSearch = text => {
         dispatch({
@@ -154,6 +218,13 @@ const GroupsState = props => {
         })
     }
 
+    // Clear prompts
+    const clearPrompts = () => {
+        dispatch({
+            type: CLEAR_PROMPTS
+        })
+    }
+
     // Clear Success
     const clearSuccess = () => {
         dispatch({
@@ -169,17 +240,24 @@ const GroupsState = props => {
             groups: state.groups,
             filtered: state.filtered,
             cancel_search: state.cancel_search,
+            user_groups_loading: state.user_groups_loading,
+            user_groups: state.user_groups,
             loading: state.loading,
             error: state.error,
+            prompt: state.prompt,
             uploadGroup,
             loadGroups,
             changeView,
             filterByCourse,
+            getUserGroups,
             filterSearch,
             killFilter,
+            sendJoinRequest,
+            setGroupCurrent,
             clearFilter,
             clearErrors,
             clearSuccess,
+            clearPrompts,
             logout
         }}>
             {props.children}

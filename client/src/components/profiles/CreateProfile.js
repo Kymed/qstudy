@@ -37,7 +37,7 @@ const CreateProfile = ({profile = emptyProfile, prompt}) => {
 
     return (
         <Fragment>
-            <div className="card-md">
+            <div className="card-md create-profile-margin">
                 <h2> {prompt} </h2>
                 <form onSubmit={onSubmit}>
                     <h2 className="small mt-1"> Your profile picture is loaded from your email-based gravatar </h2>

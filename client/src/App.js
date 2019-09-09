@@ -17,6 +17,7 @@ import ProfileAlertHandler from './components/profiles/ProfileAlertHandler';
 
 import Groups from './components/groups/Groups';
 import CreateGroup from './components/groups/CreateGroup';
+import Study from './components/study/Study';
 
 import AuthState from './context/auth/AuthState';
 import AlertState from './context/alert/AlertState';
@@ -58,6 +59,7 @@ const App = () => {
                   <ProfileRoute exact path="/groups" component={Groups} />
                   <ProfileRoute exact path="/profile/:id" component={Profile} />
                   <ProfileRoute exact path="/newgroup" component={CreateGroup} />
+                  <ProfileRoute exact path="/studyview" component={Study} />
                   <Route exact path='/' component={Landing} />
                   <Route exact path='/login' component={Login} />
                   <Route exact path='/register' component={Register} />

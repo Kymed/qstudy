@@ -210,20 +210,10 @@ router.get('/user/:user_id', async (req, res) => {
 // @route  GET api/profile/groups
 // @desc   Gets all groups that the user is in
 // @access Private
-// This O(N^2) Algo makes me uncomfortable but it's the best option right now
-// As array-subdoc querying is not working for me. At a scale this is unacceptable.
 router.get('/groups', auth, async (req, res) => {
     try {
-
-        let allGroups = await Group.find().sort({ date: -1 });
-        let groups = new Array();
-        allGroups.some(group => {
-            group.members.some(member => {
-                if (member.user.toString() === req.user.id) {
-                    return groups.push(group);
-                }
-            })
-        });
+        
+        const groups = await Group.find({ "members.user" : req.user.id.toString()});
 
         res.json(groups);
 
@@ -239,16 +229,7 @@ router.get('/groups', auth, async (req, res) => {
 router.get('/groupsAsHost', auth, async (req, res) => {
     try {
 
-        let allGroups = await Group.find().sort({ date: -1 });
-        let groups = new Array();
-        allGroups.some(group => {
-            group.members.some(member => {
-                if (member.user.toString() === req.user.id && member.host === true) {
-                    return groups.push(group);
-                }
-            })
-        });
-
+        const groups = await Group.find({ members : { $elemMatch: { user: req.user.id, host: true }}})
         res.json(groups);
 
     } catch (err) {
@@ -542,7 +523,7 @@ router.get('/buddyProfiles', auth, async(req, res) => {
 
 
 // @route  GET api/profile/invites
-// @desc   Get all group invites
+// @desc   Get the groups that sent an invite
 // @access Private
 router.get('/invites', auth, async (req, res) => {
     try {
@@ -553,8 +534,9 @@ router.get('/invites', auth, async (req, res) => {
             return res.status(404).json({ msg: 'Profile has not been created yet, make one' });
         }
 
-        /* Query for the invites and return */
-        res.json(profile.invites);
+        /* Get the groups that sent invites and return */
+        const groups = await Group.find({ _id: { $in: profile.invites }});
+        res.json(groups);
         
     } catch (err) {
         console.error(err.message);

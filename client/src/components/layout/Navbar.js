@@ -29,12 +29,7 @@ const Navbar = props => {
 
             {profile_exists &&
             (<Fragment>
-                <Link to={{
-                        pathname: `/newgroup`,
-                        state: {
-                            goBack: `/home`
-                        }
-                }} className={navName}>Create</Link>
+                <Link to="/studyview" className={navName}>Study</Link>
                 <Link to="/groups" className={navName}>Groups</Link>
                 <Link to="/peers" className={navName}> Peers </Link>
                 {/*<Link to="/newgroup" className={navName}> NewGroup </Link>*/}

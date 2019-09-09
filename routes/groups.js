@@ -74,19 +74,37 @@ router.post('/', [auth, [
     }
 
     const { name, course, description, max_members, public, id } = req.body;
-    const groupFields = {};
 
+    /* CHECK IF A GROUP UPDATE IS DONE BY A HOST */
+    if (id) {
+        const group = await Group.findById(id);
+        if (group) {
+            let memberIndex = group.members.filter(member => member.user.toString() === req.user.id.toString());
+            if (memberIndex.length > 0) {
+                if (memberIndex[0].host === false) {
+                    return res.status(401).json({ msg: 'You are not a host of this group' });
+                }
+            } else {
+                return res.status(401).json({ msg: 'You are not a member of this group' });
+            }
+        }
+    }
+    /* CHECK IF A GROUP UPDATE IS DONE BY A HOST */
+
+    const groupFields = {};
     if (name) groupFields.name = name;
     if (course) groupFields.course = course;
     if (description) groupFields.description = description;
     if (max_members) groupFields.max_members = max_members;
     if (public) groupFields.public = public;
 
-    groupFields.members = [];
-    groupFields.members.push({
-        user: req.user.id,
-        host: true
-    });
+    if (!id) {
+        groupFields.members = [];
+        groupFields.members.push({
+            user: req.user.id,
+            host: true
+        });
+    }
 
     try {
         if (id) {
@@ -178,7 +196,7 @@ router.get('/byCourse/:course', auth, async (req, res) => {
 // @route  GET api/groups/:id
 // @desc   Get group by id
 // @access Private
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const group = await Group.findById(req.params.id);
 
@@ -459,6 +477,23 @@ router.delete('/requests/:group_id/:user_id', auth, async (req, res) => {
     }
 });
 
+// TODO: Delete
+// Temporary route as dev tools
+router.get('/devtools/:id', async (req, res) => {
+    try {
+        const group = await Group.findById(req.params.id);
+
+        group.requests = new Array();
+
+        await group.save();
+        
+        res.json(group);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route  PUT api/groups/invite/:group_id/:profile_id
 // @desc   Send an invite to a profile
 // @access Private
@@ -531,15 +566,15 @@ router.put('/invite/:group_id/:profile_id', auth, async (req, res) => {
     }
 });
 
-// @route  PUT api/groups/members/:group_id/:profile_id
+// @route  PUT api/groups/members/:group_id/:user_id
 // @desc   Add a member to the group
 // @access Private
-router.put('/members/:group_id/:profile_id', auth, async (req, res) => {
+router.put('/members/:group_id/:user_id', auth, async (req, res) => {
     try {
 
         /* Fetch the group and member to add to the group */
         const group = await Group.findById(req.params.group_id);
-        const joiningProfile = await Profile.findById(req.params.profile_id);
+        const joiningProfile = await Profile.findOne({ user: req.params.user_id });
         let user = joiningProfile.user;
 
         /* Check if the retrievals were successful */
@@ -596,11 +631,11 @@ router.put('/members/:group_id/:profile_id', auth, async (req, res) => {
 // @route  DELETE api/groups/members/:group_id/:profile_id
 // @desc   Remove a member from the group
 // @access Private
-router.delete('/members/:group_id/:profile_id', auth, async (req, res) => {
+router.delete('/members/:group_id/:user_id', auth, async (req, res) => {
     try {
         /* Fetch the group and member to add to the group */
         const group = await Group.findById(req.params.group_id);
-        const leavingProfile = await Profile.findById(req.params.profile_id);
+        const leavingProfile = await Profile.findOne({ user: req.params.user_id });
         let user = leavingProfile.user;
 
         /* Check if the retrievals were successful */

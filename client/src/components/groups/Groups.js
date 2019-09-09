@@ -15,7 +15,7 @@ const Groups = () => {
     const alertContext = useContext(AlertContext);
 
     const { user_profile, profile_exists } = profileContext;
-    const { groups, loading, filtered, error, changeView, killFilter, filterByCourse, clearFilter, clearErrors } = groupsContext;
+    const { groups, loading, filtered, error, changeView, killFilter, filterByCourse, clearFilter, clearErrors, prompt, clearPrompts, sendJoinRequest } = groupsContext;
     const { setAlert } = alertContext;
 
     useEffect(() => {
@@ -31,7 +31,12 @@ const Groups = () => {
             clearErrors();
         }
 
-    }, [error]);
+        if (prompt !== null) {
+            setAlert(prompt, 'success');
+            clearPrompts();
+        }
+
+    }, [error, prompt]);
 
     const isHost = (group) => {
         if (group.members[0].user === user_profile.user._id)
@@ -55,6 +60,18 @@ const Groups = () => {
     const cancelFilter = () => {
         clearFilter();
     }
+
+    /*const resetGroups = async () => {
+        await loadProfile();
+        await loadGroups();
+    }
+
+    const onClick = async (disabled, id) => {
+        if (!disabled) {
+            await sendJoinRequest(id);
+            resetGroups();
+        }
+    }*/
 
     return (loading || groups === null ?
         (<Fragment> Loading </Fragment>)
