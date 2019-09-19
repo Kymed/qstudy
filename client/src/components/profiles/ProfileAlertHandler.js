@@ -1,16 +1,23 @@
 import React, {Fragment, useEffect, useContext } from 'react';
+import io from "socket.io-client";
 
 import ProfileContext from '../../context/profiles/profileContext';
 import AlertContext from '../../context/alert/alertContext';
 
 const ProfileAlertHandler = () => {
+
     const profileContext = useContext(ProfileContext);
     const alertContext = useContext(AlertContext);
 
-    const { prompt, error, clearPrompt, clearErrors } = profileContext;
+    const { prompt, error, notification, clearPrompt, clearErrors, clearNotifications } = profileContext;
     const { setAlert } = alertContext;
 
     useEffect(() => {
+        if (notification !== null) {
+            setAlert(notification, 'success');
+            clearNotifications();
+        }
+
         if (prompt !== null) {
             setAlert(prompt, 'success');
             clearPrompt();
@@ -25,7 +32,7 @@ const ProfileAlertHandler = () => {
             clearErrors();
         }
 
-    }, [error, prompt]);
+    }, [error, prompt, notification]);
 
     return (
         <Fragment>

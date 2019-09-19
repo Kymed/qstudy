@@ -15,11 +15,11 @@ const Navbar = props => {
     const { isAuthenticated } = authContext;
     const { profile_exists } = profileContext;
     
-    let navName = "text-center nav-item"
+    let navName = "text-center nav-item";
 
     const onLogout = () => {
-        authContext.logout();
         profileContext.logout();
+        authContext.logout();
         peersContext.logout();
         groupsContext.logout();
     }

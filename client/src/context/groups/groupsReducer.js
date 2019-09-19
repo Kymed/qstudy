@@ -105,7 +105,16 @@ export default (state, action) => {
                 ...state,
                 current: null,
                 creation_error: null,
-                loading: true
+                creation_success: false,
+                groups_loaded: false,
+                user_groups: [],
+                groups: [],
+                filtered: [],
+                cancel_search: false,
+                user_groups_loading: true,
+                loading: true,
+                error: null,
+                prompt: null
             }
 
         default:

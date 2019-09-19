@@ -7,7 +7,7 @@ export default (state, action) => {
         case PEERS_LOADED:
             return {
                 ...state,
-                peers: [...action.payload],
+                peers: action.payload,
                 peers_loaded: true,
                 loading: false
             };

@@ -255,6 +255,11 @@
       height: 100%;
       display: flex;
   }
+
+  .fa-bars, menu-toggle {
+    color: #fff;
+    background-color: #603F8B;
+  }
   
   /* some more profile stuff */
   .profile-card {
@@ -598,11 +603,11 @@
   
   /*HAMBURGER*/
   label{
-    color: #FFCDBC;
+    color: #FFF;
     width: 80px;
     display: flex;
     justify-content: center;
-    background-color: #050505;
+    background-color: #603F8B;
     align-items: center;
     transition: transform 0.5s;
   }
@@ -652,7 +657,7 @@
   
   
   @media only screen and (min-width: 768px) {
-    label, input, .menu-toggle, .menu-toggle-items, .menu-toggle-items a{
+    label, .menu-toggle, .menu-toggle-items, .menu-toggle-items a{
         display: none;
     }
   }
@@ -943,9 +948,16 @@
 }
 
 .study-card-lg {
+  height: 340px;
   width: 600px;
-  flex-grow: 4;
-  flex-shrink: 2;
+  flex-grow: 3;
+  flex-shrink: 1;
+}
+
+@media (max-width: 768px) {
+  .study-card, .study-card-lg {
+    width: 400px;
+  }
 }
 
 .study-text {
@@ -1067,3 +1079,83 @@
   flex-wrap: wrap;
 }
 
+.study-button-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 3px 3px 3px 3px;
+}
+
+/* chat messages group */
+.chat-wrapper {
+  height: 100%;
+}
+
+/*.overflow-wrapper {
+  overflow: scroll;
+  height: 70%;
+}
+
+.messages-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}*/
+
+.overflow-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 70%;
+}
+
+.messages-wrapper{
+  flex: 1 1 auto;
+  overflow-y: scroll;
+}
+
+.chat-bar-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.chat-bar {
+  height: 35px;
+  box-shadow: none;
+  outline: none;
+  background-color: #fff;
+  box-sizing: border-box;
+  width: 500px;
+  padding: 1rem 1rem;
+  font-size: 0.8rem;
+  border: 0.5px solid #EA3160;
+  border-radius: 4px;
+}
+
+.chat-bar:hover {
+  box-sizing: border-box;
+  border: 0.5px solid #EA3160;
+  -webkit-box-shadow:  0 0 1px 3px rgba(234, 49, 96, 0.1);
+  -moz-box-shadow:  0 0 1px 3px rgba(234, 49, 96, 0.1);
+  box-shadow:  0 0 1px 3px rgba(234, 49, 96, 0.1);
+  padding: 1rem 1rem;
+  font-size: 1.25rem;
+  font-size: 0.8rem;
+}
+
+.btn-chat {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  margin: 1rem;
+  background-color: #EA3160;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.3s;
+  height: 35px;
+}
+/* chat messages group */

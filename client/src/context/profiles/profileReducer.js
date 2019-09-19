@@ -1,4 +1,4 @@
-import { BUDDY_REQUEST_SENT, CLEAR_PROMPTS, LOGOUT, CLEAR_ERRORS, INITIATE_EDITING, PROFILE_NOT_EXISTS, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED } from '../types';
+import { PROFILE_RECIEVE_NOTIFICATION, BUDDY_REQUEST_SENT, CLEAR_PROMPTS, LOGOUT, CLEAR_ERRORS, INITIATE_EDITING, PROFILE_NOT_EXISTS, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, CLEAR_NOTIFICATIONS, PROFILES_LOADED } from '../types';
 
 export default (state, action) => {
     console.log(action);
@@ -43,6 +43,12 @@ export default (state, action) => {
                 ...state,
                 prompt: action.payload
             }
+        
+        case PROFILE_RECIEVE_NOTIFICATION:
+            return {
+                ...state,
+                notification: action.payload
+            }
 
         case LOGOUT:
             return {
@@ -53,6 +59,7 @@ export default (state, action) => {
                 loading: true,
                 peers_loaded: false,
                 error: null,
+                notification: null,
                 prompt: null
             }
         
@@ -72,6 +79,12 @@ export default (state, action) => {
             return {
                 ...state,
                 error: null
+            }
+
+        case CLEAR_NOTIFICATIONS:
+            return {
+                ...state,
+                notification: null
             }
 
         default:

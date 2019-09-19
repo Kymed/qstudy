@@ -7,18 +7,19 @@ import PeerFilter from './PeerFilter';
 import ProfileContext from '../../context/profiles/profileContext';
 import PeersContext from '../../context/peers/peersContext';
 
-const Peers = props => {
+const Peers = () => {
     const profileContext = useContext(ProfileContext);
     const peersContext = useContext(PeersContext);
 
     const { user_profile, profile_exists } = profileContext;
-    const { peers, peers_loaded, clearFilter, killFilter, filterByCourse, filtered, changeView, loading, error } = peersContext;
+    const { peers, clearFilter, killFilter, filterByCourse, filtered, changeView, loading, error } = peersContext;
 
     useEffect(() => {
         if (profile_exists) {
             peersContext.loadPeers(user_profile.courses);
         }
-    }, []);
+
+    }, [profile_exists]);
 
     const openLargeView = (id) => {
         changeView(id, 'large');
@@ -59,7 +60,7 @@ const Peers = props => {
                             if (peer.view === "normal") {
                                 return <Peer key={peer._id} openLargeView={openLargeView} profile={peer} />
                             } else {
-                                return <ViewPeer key={peer._id} closeLargeView={closeLargeView} profile={peer} />
+                                return <ViewPeer key={peer._id} closeLargeView={closeLargeView} profile={peer}/>
                         }})
                     : 
                         filtered.map((peer, index) => {
@@ -67,7 +68,7 @@ const Peers = props => {
                             if (peer.view === "normal") {
                                 return <Peer key={peer._id} openLargeView={openLargeView} profile={peer} />
                             } else {
-                                return <ViewPeer key={peer._id} closeLargeView={closeLargeView} profile={peer} />
+                                return <ViewPeer key={peer._id} closeLargeView={closeLargeView} profile={peer}/>
                         }})
                     }
                 </div>

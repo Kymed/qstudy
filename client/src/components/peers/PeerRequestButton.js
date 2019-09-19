@@ -9,7 +9,7 @@ import PeerContext from '../../context/peers/peersContext';
  * to a dynamic button. Though it's not like theres hundreds
  * of em at once.
  */
-const PeerRequestButton = ({ peerid, useThisPeerInstead = null}) => {
+const PeerRequestButton = ({ peerid, useThisPeerInstead = null }) => {
     const profileContext = useContext(ProfileContext);
     const peerContext = useContext(PeerContext);
 
@@ -63,7 +63,7 @@ const PeerRequestButton = ({ peerid, useThisPeerInstead = null}) => {
         }
 
         // Check if you have sent a request
-        exists = requests.filter(request => request === user_profile.user. _id);
+        exists = requests.filter(request => request === user_profile.user._id);
         if (exists.length > 0) {
             return setBtn({
                 text: 'Buddy request sent',
@@ -81,14 +81,17 @@ const PeerRequestButton = ({ peerid, useThisPeerInstead = null}) => {
     useEffect(() => {
         findRequestState();
 
-    }, [peers]);
+    }, [useThisPeerInstead, peers]);
 
-    const onClick = async () => {
+    const sendRequest = async () => {
+        await sendBuddyRequest(peerid);
+        await loadProfile();
+        await loadPeers(user_profile.courses);
+    }
+
+    const onClick = () => {
         if (!btn.disabled) {
-            sendBuddyRequest(peerid);
-            await loadProfile();
-            await loadPeers(user_profile.courses);
-            findRequestState();
+            sendRequest();
         }
     }
 

@@ -5,6 +5,7 @@ const router = express.Router();
 const auth = require('../middleware/auth')
 const { check, validationResult } = require('express-validator/check');
 const pushNotification = require('../utils/notification');
+const sendLivePush = require('../app');
 
 const Profile = require('../models/Profile');
 const Group = require('../models/Group');
@@ -262,33 +263,6 @@ router.get('/byCourse/:courses', auth, async (req, res) => {
     }
 });
 
-/*
-// @route  GET api/profile/testNotification
-// @desc   Test the notification utility function
-// @access Private
-router.get('/testNotification', auth, async (req, res) => {
-    try {
-        let profile = await Profile.findOne({ user: req.user.id });
-        if (!profile) {
-            res.status(404).json({ msg: 'Profile not found' });
-        }
-
-        let notification = {
-            message: "woop",
-            group: "5d264e314a38a25ce6e65ea2"
-        }
-
-        profile = await pushNotification(notification, profile._id);
-
-        res.json(profile.notifications);
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-});
-*/
-
 // @route  GET api/profile/request
 // @desc   Get friend requests
 // @access Private
@@ -365,6 +339,8 @@ router.put('/request/:profile_id', auth, async (req, res) => {
             profile: `${fromProfile._id}`
         }, toProfile._id);
 
+        sendLivePush(`${toUser.toString()}`, `${fromUser.name} has sent you a buddy request`);
+
         res.json({ msg: `Buddy request successfully sent to ${toProfile.user.name}`});
 
     } catch (err) {
@@ -434,6 +410,7 @@ router.put('/buddy/:buddy_id', auth, async (req, res) => {
         buddyProfile.buddies.unshift(req.user.id);
         await buddyProfile.save();
         await profile.save();
+        
         res.json(profile.buddies);
 
     } catch (err) {
@@ -520,7 +497,6 @@ router.get('/buddyProfiles', auth, async(req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 // @route  GET api/profile/invites
 // @desc   Get the groups that sent an invite

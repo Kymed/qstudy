@@ -2,8 +2,11 @@ import React, { useReducer } from 'react';
 import axios from 'axios';
 import ProfileContext from './profileContext';
 import profileReducer from './profileReducer';
+import io from "socket.io-client";
 
-import { BUDDY_REQUEST_SENT, CLEAR_PROMPTS, CLEAR_ERRORS, INITIATE_EDITING, LOGOUT, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED, PROFILE_NOT_EXISTS } from '../types';
+import { PROFILE_RECIEVE_NOTIFICATION, BUDDY_REQUEST_SENT, CLEAR_PROMPTS, CLEAR_ERRORS, INITIATE_EDITING, LOGOUT, PROFILE_USER_LOADED, PROFILE_USER_SUCCESS, PROFILE_USER_FAIL, PROFILE_ERROR, PROFILES_LOADED, PROFILE_NOT_EXISTS, CLEAR_NOTIFICATIONS } from '../types';
+
+let socket;
 
 const ProfileState = props => {
     const initialState = {
@@ -12,13 +15,36 @@ const ProfileState = props => {
         user_profile: null,
         loading: true,
         prompt: null,
+        notification: null,
         error: null
     }
 
     const [state, dispatch] = useReducer(profileReducer, initialState);
 
+    // Initialize socket
+    if (!socket) {
+        socket = io("http://localhost:5000");
+
+        socket.on('notification', data => {
+            console.log('recieving notification');
+            dispatch({
+                type: PROFILE_RECIEVE_NOTIFICATION,
+                payload: data
+            });
+        })
+    }
+
+    // Subscribe to push notifications
+    const secureSubscription = async () => {
+        socket.emit('subscribe_push', {
+            token: localStorage.token
+        });
+    }
+
     // Load Profile
     const loadProfile = async () => {
+        // Subscribe to notifications if not already
+
         try {
             const res = await axios.get('api/profile/me');
 
@@ -26,6 +52,8 @@ const ProfileState = props => {
                 type: PROFILE_USER_LOADED,
                 payload: res.data
             })
+
+            secureSubscription();
 
         } catch (err) {
 
@@ -97,6 +125,10 @@ const ProfileState = props => {
 
     // Logout
     const logout = () => {
+        socket.emit('unsubscribe_push', {
+            token: localStorage.token
+        })
+
         dispatch({
             type: LOGOUT
         });
@@ -114,6 +146,10 @@ const ProfileState = props => {
         type: CLEAR_ERRORS
     });
 
+    const clearNotifications = () => dispatch({
+        type: CLEAR_NOTIFICATIONS
+    })
+
     return (
         <ProfileContext.Provider value={{
             profile_exists: state.profile_exists,
@@ -123,6 +159,7 @@ const ProfileState = props => {
             loading: state.loading,
             peers_loaded: state.peers_loaded,
             error: state.error,
+            notification: state.notification,
             prompt: state.prompt,
             loadProfile,
             uploadProfile,
@@ -130,7 +167,8 @@ const ProfileState = props => {
             initiateEditing,
             logout,
             clearPrompt,
-            clearErrors
+            clearErrors,
+            clearNotifications
         }}>
             {props.children}
         </ProfileContext.Provider>

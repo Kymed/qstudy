@@ -17,8 +17,8 @@ const Landing = () => {
         <section className="landing">
             <h1 className="p-1 landing-title"> QStudy </h1>
             <h2 className="p-1 landing-subtitle"> An Academic Micro Social Media </h2>
-            <p className="p-1 landing-p"> Don't know anyone in your classes? Can't find any or all the facebook groups for your courses? Know a quiet spot on campus or got a nice living room and would like to host a cram?
-                QStudy is an application for students at Queen's University to form online or in-person study groups and cram sessions, built and designed to solve such problems. </p>
+            <p className="p-1 landing-p"> Don't know anyone in your classes? Can't find a facebook group for one of your courses? Don't want to make a Facebook? Want to meet others in your classes?
+                QStudy is an application for students at Queen's University to form study groups. </p>
         </section>
     )
 }

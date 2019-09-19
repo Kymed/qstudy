@@ -57,7 +57,7 @@ const BuddyRequests = ({ setRefreshBuddies }) => {
         try {
             await axios.delete(`api/profile/request/${profileid}`);
 
-            setAlert('request declined', 'success');
+            setAlert('Request declined', 'success');
             getRequests();
         } catch (err) {
             setAlert(err.response.data.msg, 'danger');

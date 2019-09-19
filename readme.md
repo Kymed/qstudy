@@ -29,7 +29,7 @@ My first side project of significant scale. My 2d game had 5000 lines and maybe 
 
 ### Business Pitch (Use cases)
 
-1. It's popular for people on facebook to host group chats for courses, which has tons of use, and is fairly popular. Problem is, you can't really find them all the time unless you run into some link in a comment section or get invited to one. A Query system makes a big difference, especially when you can query by course.
+1. It's popular for people on facebook to host group chats for courses, which has tons of use, and is fairly popular. Problem is, you can't really find them all the time unless you run into some link in a comment section or get invited to one. A Query system makes a big difference, especially when you can query by course. Also, not everyone has Facebook.
 2. Some people like real-life group studying, though may not know people in a certain elective, or their friends are uninterested in group studying, so creating a system to host IRL crams (Coming soon) could be really useful.
 3. A way to find, meet, and connect with others at your school in your courses. Especially useful for those who don't attend lectures and stick to studying the online content. Which is astonishingly popular.
 4. Tailoring a social media to an audience can be pretty powerful. Especially if it's just slight user experience tweaks. Take Linkedin for example, It's facebook but they renamed the friends list to "connections" and made the profile look more like a resume, while Facebook still has all those features like past job experiences.

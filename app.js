@@ -1,7 +1,9 @@
 const express = require('express');
 const connectDB = require('./config/db');
-
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const socketHandlers = require('./sockets/handlers');
 
 /*
     This was a large APi and one of my first fully completed things.
@@ -24,10 +26,19 @@ app.use(express.json({
     extended: false
 }));
 
-// test route
-app.get('/', (req, res) => {
-    res.send('api working');
+// handle socket server
+io.on('connection', (socket) => {
+    socket.on('subscribe', (data) => socketHandlers.subscribeToGroup(data, socket));
+    socket.on('send_message', (data) => socketHandlers.recieveMessage(data, io));
+    socket.on('subscribe_push', (data) => socketHandlers.subscribeToPush(data, socket));
+    socket.on('unsubscribe', (data) => socketHandlers.unsubscribeToGroup(data, socket));
+    socket.on('unsubscribe_push', (data) => socketHandlers.unsubscribeToPush(data, socket));
 });
+
+// export push notification
+module.exports = (userid, msg) => {
+    io.in(`user-${userid}`).emit('notification', `${msg}`);
+}
 
 // define routes
 app.use('/api/users', require('./routes/users'));
@@ -38,38 +49,4 @@ app.use('/api/events', require('./routes/events'));
 
 // start api
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on ${PORT}`));
-
-/*
-    TODO: Add messages to be sent for notifications (with options to add links to groups/events)
-*/
-
-/* NAVS
-
-GUEST - REGISTER LOGIN
-USER - EXPLORE PEERS GROUPS DASHBOARD LOGOUT
->DASHBOARD - PROFILEINFO EDITPROFILE MYGROUPS NOTIFICATIONS FRIENDSLIST (>CREATEGROUP)
->NOTIFICATIONS - Friend Requests, Group invites, Group requests, Messages
->PEERS - PEOPLE ONLINE IN YOUR CLASSES
->EXPLORE - GOOGLE MAPS OF UPCOMING SESSIONS IN YOUR CLASSES 
->GROUPS - GROUPS PEOPLE MADE OF YOUR CLASSES (>CREATEGROUP)
->CREATEGROUP - FORM
->CREATEEVENT - MAP & FORM
->GROUP - JOINREQUESTS MEMBERS EVENTS GROUPCHAT STICKIED JOIN_LINK (EXTRA FEATURES IF HOST)
->PEER - GROUPS CLASSES BIO YEAR ADD_OPTION INVITE_GROUP
->INSTANTINVITE
-
-*/
-
-/* REASONS
-
- 1. Facebook study groups have trouble marketing themselves those enrolling in the classes
- 2. Not everyone has facebook
- 3. Some people are taking courses out of their degree and may not have friends in such class
- 4. Some people don't go to such class and don't make friends in such lectures
- 5. Some people like real-life group study sessions but don't know many in the class
- 6. People like to help eachother, ask questions, and get answered
- 7. Facebook is not intuitive for the use-cases of an education based social media
- 8. It's like Linkedin for people studying
-
-*/
+http.listen(PORT, () => console.log(`Server started on ${PORT}`));

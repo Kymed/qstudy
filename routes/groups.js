@@ -9,6 +9,7 @@ const Profile = require('../models/Profile');
 const User = require('../models/User');
 
 const pushNotification = require('../utils/notification');
+const sendLivePush = require('../app');
 
 /*
     Tried my best to think critically and maximize the APi design to be practical,
@@ -235,7 +236,6 @@ router.get('/events/:group_id', auth, async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
-
 });
 
 // @route  DELETE api/groups/:id
@@ -274,6 +274,33 @@ router.delete('/:id', auth, async (req, res) => {
         res.status(500).send('Server error');
     }
 
+});
+
+// @route GET api/groups/memberProfiles/:group_id
+// @desc  Get all the profiles of members of a group
+// @access Private
+router.get('/memberProfiles/:group_id', auth, async (req, res) => {
+    try {
+        /* get the group */
+        const group = await Group.findById(req.params.group_id);
+        if (!group) {
+            return res.status(404).json({ msg: 'Group not found' });
+        }
+
+        /* check if the user is a member of the group */
+        const memberIndex = group.members.map(member => member.user.toString()).indexOf(req.user.id.toString());
+        if (memberIndex < 0) {
+            return res.status(401).json({ msg: 'You are not a member of this group' });
+        }
+
+        /* get the profiles */
+        const profiles = await Profile.find({ user: { $in: group.members.map(member => member.user) }}).populate('user', ['name', 'avatar', '_id']);
+        res.json(profiles);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
 });
 
 // @route  POST api/groups/posts/:group
@@ -477,23 +504,6 @@ router.delete('/requests/:group_id/:user_id', auth, async (req, res) => {
     }
 });
 
-// TODO: Delete
-// Temporary route as dev tools
-router.get('/devtools/:id', async (req, res) => {
-    try {
-        const group = await Group.findById(req.params.id);
-
-        group.requests = new Array();
-
-        await group.save();
-        
-        res.json(group);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-});
-
 // @route  PUT api/groups/invite/:group_id/:profile_id
 // @desc   Send an invite to a profile
 // @access Private
@@ -558,6 +568,8 @@ router.put('/invite/:group_id/:profile_id', auth, async (req, res) => {
             group: group._id
         }, profile._id);
 
+        sendLivePush(`${profile.user.toString()}`, `You have been invited to ${group.name}`);
+
         res.json({ msg: `Invite was sent to ${user.name}`});
 
     } catch (err) {
@@ -615,6 +627,9 @@ router.put('/members/:group_id/:user_id', auth, async (req, res) => {
         if (requestIndex < 0) {
             return res.status(400).json({ msg: 'User did not request to join the group' });
         }
+
+        /* send a push notification */
+        sendLivePush(`${joiningProfile.user.toString()}`, `You have been accepted into ${group.name}`)
 
         /* Add the new member, resolve the request, save & return */
         group.members.push({ user: user, host: false });

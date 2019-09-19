@@ -101,19 +101,17 @@ const StudyView = () => {
                         {isHost && 
                             <StudyInvite groupid={current._id} members={current.members} requests={current.requests} reload={reload} />
                         }
-                        <StudyChat />
+                        <StudyChat groupid={current._id}/>
                     </div>
                     )}
                     <div className="button-group">
+                    <button className="btn-dash" onClick={() => collapseSidebar()}>Change group</button>
                         <button className="btn-dash btn-create" onClick={() => reload()}>Reload</button>
                         {editing ? (
                             <button className="btn-dash" onClick={() => cancelEditing()}>Stop Editing</button>
                         ) : (
                             <button className="btn-dash" onClick={() => beginEditing()}>Edit Group</button>
                         )}
-                    </div>
-                    <div className="button-group">
-                        <button className="btn-dash" onClick={() => collapseSidebar()}>Change group</button>
                         <Link to={{
                             pathname: '/newgroup',
                             state: {
