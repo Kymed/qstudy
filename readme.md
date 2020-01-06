@@ -43,11 +43,6 @@ My first side project of significant scale. My 2d game had 5000 lines and maybe 
 * Friend Request System. APi utilizing authentication and the encapsulation of logic to securely create a permission system in which if the APi was manually interfaced, friends can only become friends if a party requests and the other accepts. Dynamic "friend request button" with logic to change it's local state depending on state in the friend-request system.
 * Alert System. Fixed, colored (based on alert) tabs on the bottom right, where any component in the tree can spawn one, removed by a delay, by utilizing Context APi. For uses such as validation errors, successful sending of friend requests, group-join requests, and group-member acceptances.
 
-### TODO (Soon)
-
-* Group invites in Dashboard with accept buttons
-* Create Socket.io Server, with Authenticated connections for group messaging and push notifications
-
 ### TODO (When I pick the project back up next summer)
 
 * Formally test REST APi with coded cases
