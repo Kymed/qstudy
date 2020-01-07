@@ -386,21 +386,6 @@
     margin-right: right;
   }
 
-  @media (max-width: 768px) {
-    .buddy-card {
-      margin-left: 0px;
-    }
-
-    .requests-title {
-      font-size: 1.5rem;
-      margin: 1rem;
-    }
-
-    .requests-text{
-      font-size: 1rem;
-    }
-  }
-
   .profile-buddy-row {
     display: flex;
     text-align: center;
@@ -1159,3 +1144,32 @@
   height: 35px;
 }
 /* chat messages group */
+
+/* responsive */
+@media (max-width: 768px) {
+  h1 {
+    line-height: 1em;
+  }
+
+  .buddy-card {
+    margin-left: 0px;
+  }
+
+  .requests-title {
+    font-size: 1.5rem;
+    margin: 1rem;
+  }
+
+  .requests-text{
+    font-size: 1rem;
+  }
+
+  .studyview-wrapper, .studyview-cards {
+    justify-content: center;
+  }
+
+  .container {
+    padding: 24px;
+  }
+}
+/* responsive */
