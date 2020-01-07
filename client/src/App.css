@@ -671,19 +671,7 @@
     margin: 1rem;
   }
 
-  @media (max-width: 1280px) {
-    .dashboard-buddies {
-      justify-content: flex-start;
-    }
-  }
 
-  @media (max-width: 768px) {
-    .dashboard-buddies {
-      margin-top: 1rem;
-      margin-left: 0px;
-
-    }
-  }
   /* dashboard */
   
   .btn-primary {
@@ -939,12 +927,6 @@
   flex-shrink: 1;
 }
 
-@media (max-width: 768px) {
-  .study-card, .study-card-lg {
-    width: 400px;
-  }
-}
-
 .study-text {
   font-size: 1rem;
   margin-bottom: 0.5rem;
@@ -1169,7 +1151,59 @@
   }
 
   .container {
-    padding: 24px;
+    padding: 5vh 5vw 5vh 5vw;
+  }
+}
+
+@media (max-width: 1280px) {
+  .dashboard-buddies {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-buddies {
+    margin-top: 1rem;
+    margin-left: 0px;
+
+  }
+}
+
+@media (max-width: 768px) {
+  .study-card, .study-card-lg {
+    width: 90vw;
+    margin: 8px 0px 8px 0px;
+  }
+
+  .card-md {
+    max-width: 90vw;
+  }
+
+  .peer-card-small {
+    width: 90vw;
+  }
+
+  .explore-group-card {
+    width: 90vw;
+    margin: 0;
+  }
+
+  .card-row {
+    width: 90vw;
+  }
+
+  .right-row-text {
+    margin-right: 1px;
+  }
+  
+  .row-title {
+    font-size: 1rem;
+  }
+
+  .invite-card {
+    margin: 0;
+    width: 90vw;
+    max-width: 90vw;
   }
 }
 /* responsive */
