@@ -74,10 +74,8 @@ const StudyView = () => {
     const collapseSidebar = () => {
         if (sidebar === "sidebar-off") {
             collapse("sidebar-on");
-            changeWrapper("studyview-wrapper-desktop-smaller");
         } else {
             collapse("sidebar-off");
-            changeWrapper("");
         }
     }
 
