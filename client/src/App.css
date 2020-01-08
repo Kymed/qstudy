@@ -1205,5 +1205,38 @@
     width: 90vw;
     max-width: 90vw;
   }
+
+  .studyview-wrapper-desktop-smaller {
+    width: 100%;
+  }
+
+  .sidebar-on {
+    width: 85vw;
+  }
+
+  /* production */
+  .card-lg {
+    padding: 15px;
+    margin: 15px;
+  }
+
+  .landing {
+    padding: 10px;
+    margin: 10px;
+    width: 85vw;
+  }
+
+  .landing-title {
+    font-size: 4rem;
+  }
+
+  .studyview-wrapper-desktop-smaller {
+    width: 100%;
+  }
+
+  .sidebar-on {
+    width: 85vw;
+  }
+  /* production */
 }
 /* responsive */
