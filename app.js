@@ -4,6 +4,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const socketHandlers = require('./sockets/handlers');
+const path = require('path');
 
 /*
     This was a large APi and one of my first fully completed things.
@@ -46,6 +47,16 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/profile', require('./routes/profile'));
 app.use('/api/groups', require('./routes/groups'));
 app.use('/api/events', require('./routes/events'));
+
+// Serve static assets if we're in production
+if (process.env.NODE_ENV === 'production') {
+    // Set static folder
+    app.use(express.static('client/build'))
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    });
+}
 
 // start api
 const PORT = process.env.PORT || 5000;
