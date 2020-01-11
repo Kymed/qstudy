@@ -65,3 +65,10 @@ My first side project of significant scale. My 2d game had 5000 lines and maybe 
 * Make more middleware and promise returning utility functions for APi logic reusability
 * Use of CSS Grid for layout management and layout-skeleton loading screens
 * Mobile-first approach to responsive design
+
+
+### Bugs I found a lot later :((
+
+* The error message doesn't properly display on the client for min-character password creation validation (works in the back, as the backend is well tested)
+* Sometimes the friend request button when viewing a profile will be "Send Friend Request" even if friends
+* Sometimes when you go the groups page, a blank error popup will show up.
